@@ -1,18 +1,25 @@
+// Package ubot provides types and
 package ubot
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"io/ioutil"
 	"log"
+	"net/http"
 	"strconv"
 	"sync"
+	"time"
 )
 
+// matcherHandler encapsulates an UMatcher and the corresponding UHandler
 type matcherHandler struct {
 	matcher UMatcher
 	handler UHandler
 }
 
+// evaluate execute the handler func if the matcher returns true
 func (m *matcherHandler) evaluate(ctx context.Context, bot *Bot, message O) (result bool, err error) {
 	if m.matcher(bot, message) {
 		result, err = m.handler(ctx, bot, message)
@@ -20,6 +27,8 @@ func (m *matcherHandler) evaluate(ctx context.Context, bot *Bot, message O) (res
 	return
 }
 
+// Bot is the main type of ubot.
+// It implements a bot API frontend.
 type Bot struct {
 	Configuration         Configuration
 	apiClient             ApiClient
@@ -35,6 +44,7 @@ type Bot struct {
 	chatMemberMHs         []matcherHandler
 }
 
+// NewBot creates a new Bot for the given configuration
 func NewBot(configuration *Configuration) (result *Bot) {
 	result = &Bot{
 		Configuration: *configuration,
@@ -43,6 +53,7 @@ func NewBot(configuration *Configuration) (result *Bot) {
 	return
 }
 
+// methodURL transforms a method name in the corresponding API url
 func (b *Bot) methodURL(method string) (result string) {
 	if method == "" {
 		panic("Emtpy method")
@@ -51,6 +62,7 @@ func (b *Bot) methodURL(method string) (result string) {
 	return
 }
 
+// getUpdatesSource
 func (b *Bot) getUpdatesSource(ctx context.Context, updatesChan chan O) {
 	var nextUpdate int64 = 0
 	var ok bool
@@ -98,8 +110,7 @@ func (b *Bot) getUpdatesSource(ctx context.Context, updatesChan chan O) {
 	}
 }
 
-/*
-func (b *Bot) serverSource(ctx context.Context, updates chan *UUpdate) {
+func (b *Bot) serverSource(ctx context.Context, updates chan O) {
 
 	serverHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		body, err := ioutil.ReadAll(r.Body)
@@ -110,13 +121,23 @@ func (b *Bot) serverSource(ctx context.Context, updates chan *UUpdate) {
 		}
 		log.Println(string(body))
 
-		var update UUpdate
-		err = json.Unmarshal(body, &update)
-		if err != nil {
+		var (
+			rawUpdate interface{}
+			update    O
+			err       error
+			ok        bool
+		)
+		if err = json.Unmarshal(body, rawUpdate); err != nil {
 			log.Printf("Error decoding body: %v", err)
 			http.Error(w, "can't decode body", http.StatusBadRequest)
 			return
 		}
+
+		if update, ok = rawUpdate.(map[string]interface{}); !ok {
+			log.Printf("Error decoding body: %v", err)
+			return
+		}
+
 		err = b.process(ctx, &update)
 
 		if err != nil {
@@ -155,7 +176,6 @@ func (b *Bot) serverSource(ctx context.Context, updates chan *UUpdate) {
 
 	log.Println("Server stopped")
 }
-*/
 
 func (b *Bot) AddChatMemberHandler(matcher UMatcher, handler UHandler) {
 	b.chatMemberMHs = append(b.chatMemberMHs, matcherHandler{matcher: matcher, handler: handler})
@@ -164,13 +184,11 @@ func (b *Bot) AddChatMemberHandler(matcher UMatcher, handler UHandler) {
 func (b *Bot) Forever(ctx context.Context, wg *sync.WaitGroup) error {
 	defer wg.Done()
 
-	// source := b.serverSource
 	source := b.getUpdatesSource
 	if b.Configuration.LongPoll {
 		source = b.getUpdatesSource
 	}
 
-	//var user *UUser
 	if user, err := b.GetMe(); err == nil {
 		b.BotUser = *user
 	} else {
@@ -180,11 +198,11 @@ func (b *Bot) Forever(ctx context.Context, wg *sync.WaitGroup) error {
 	updates := make(chan O)
 	go source(ctx, updates)
 
-	semaphore := make(chan int, 5)
+	semaphore := make(chan int, b.Configuration.WorkerNo)
 	for {
 		select {
 		case <-ctx.Done():
-			log.Println("forever is done")
+			log.Println("forever is over")
 			return nil
 		case update := <-updates:
 			semaphore <- 1

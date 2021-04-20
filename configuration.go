@@ -8,6 +8,7 @@ type Configuration struct {
 	WebhookUrl string            `json:"webhook_url"`
 	LongPoll   bool              `json:"long_poll"`
 	Params     map[string]string `json:"params"`
+	WorkerNo   int               `json:"worker_no"`
 }
 
 func (c *Configuration) Parse(data []byte) error {
