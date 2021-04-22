@@ -51,5 +51,23 @@ func main() (result *ubot.Bot, err error) {
 
 ```
 
+## UMatcher and UHandler
+
+An UMatcher is a func that is executed to check wheter an update is to be handled:
+
+```golang
+type UMatcher func(*Bot, O) bool
+```
+
+An UHandler is a func that actually handles the incoming payload:
+```golang
+type UHandler func(context.Context, *Bot, O) (bool, error)
+```
+
+UMatcher(s) can be reused and composed, _uBot_ provides quite a few boolean operators that help to compose simpler matchers.
+
+## Caveats
+Methods mapping is still not complete.
+
 ## License
 uBot is distributed under MIT.

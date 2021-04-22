@@ -46,6 +46,12 @@ type Bot struct {
 
 // NewBot creates a new Bot for the given configuration
 func NewBot(configuration *Configuration) (result *Bot) {
+	if configuration.APIToken == "" {
+		log.Fatalf("configuration has no APIToken")
+	}
+	if configuration.WorkerNo == 0 {
+		configuration.WorkerNo = 5
+	}
 	result = &Bot{
 		Configuration: *configuration,
 		apiClient:     &httpApiClient{},
@@ -110,10 +116,17 @@ func (b *Bot) getUpdatesSource(ctx context.Context, updatesChan chan O) {
 	}
 }
 
-func (b *Bot) serverSource(ctx context.Context, updates chan O) {
-
+func (b *Bot) serverSource(ctx context.Context, updatesChan chan O) {
 	serverHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		body, err := ioutil.ReadAll(r.Body)
+		var (
+			body      []byte
+			rawUpdate interface{}
+			update    O
+			err       error
+			ok        bool
+		)
+
+		body, err = ioutil.ReadAll(r.Body)
 		if err != nil {
 			log.Printf("Error reading body: %v", err)
 			http.Error(w, "can't read body", http.StatusBadRequest)
@@ -121,12 +134,6 @@ func (b *Bot) serverSource(ctx context.Context, updates chan O) {
 		}
 		log.Println(string(body))
 
-		var (
-			rawUpdate interface{}
-			update    O
-			err       error
-			ok        bool
-		)
 		if err = json.Unmarshal(body, rawUpdate); err != nil {
 			log.Printf("Error decoding body: %v", err)
 			http.Error(w, "can't decode body", http.StatusBadRequest)
@@ -138,33 +145,27 @@ func (b *Bot) serverSource(ctx context.Context, updates chan O) {
 			return
 		}
 
-		err = b.process(ctx, &update)
-
-		if err != nil {
+		if err = b.process(ctx, update); err != nil {
 			log.Println("Update processing error: ", err)
 		}
 	})
-
-	mux := http.NewServeMux()
-	mux.Handle("/ubot/"+b.Configuration.APIToken, serverHandler)
-	srv := &http.Server{
-		Addr:    b.Configuration.ServerPort,
-		Handler: mux,
-	}
 
 	if b.Configuration.WebhookUrl == "" {
 		log.Fatal("empty webhook url")
 	}
 
-	go http.ListenAndServe(b.Configuration.ServerPort, mux)
-	ok, err := b.SetWebhook(map[string]interface{}{
-		"url": b.Configuration.WebhookUrl,
-	})
-	if !ok || err != nil {
+	mux := http.NewServeMux()
+	mux.Handle(b.Configuration.WebhookUrl, serverHandler)
+	srv := &http.Server{
+		Addr:    b.Configuration.ServerPort,
+		Handler: mux,
+	}
+
+	if ok, err := b.SetWebhook(O{"url": b.Configuration.WebhookUrl}); !ok || err != nil {
 		log.Fatal("Can't set webhook")
 		return
 	}
-
+	go http.ListenAndServe(b.Configuration.ServerPort, mux)
 	<-ctx.Done()
 
 	ctxShutDown, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -184,7 +185,7 @@ func (b *Bot) AddChatMemberHandler(matcher UMatcher, handler UHandler) {
 func (b *Bot) Forever(ctx context.Context, wg *sync.WaitGroup) error {
 	defer wg.Done()
 
-	source := b.getUpdatesSource
+	source := b.serverSource
 	if b.Configuration.LongPoll {
 		source = b.getUpdatesSource
 	}
@@ -294,41 +295,61 @@ func (b *Bot) AddMyChatMemberHandler(matcher UMatcher, handler UHandler) {
 }
 
 // API Mappings
+
+// GetMe returns basic information about the bot in form of a User object.
+// see https://core.telegram.org/bots/api#getme
 func (b *Bot) GetMe() (result *UUser, err error) {
 	result = &UUser{}
 	_, err = b.doGet("getMe", nil)
 	return
 }
 
+// LogOut logs the bot out of the cloud Bot API server
+// see https://core.telegram.org/bots/api#logout
 func (b *Bot) LogOut() (err error) {
 	_, err = b.doGet("logOut", nil)
 	return
 }
 
+// Close closea the bot instance
+// see https://core.telegram.org/bots/api#close
 func (b *Bot) Close() (err error) {
 	_, err = b.doGet("close", nil)
 	return
 }
 
-// SendMessage sends a message
+// SendMessage sends a text message
+// see https://core.telegram.org/bots/api#sendmessage
 func (b *Bot) SendMessage(request O) (result O, err error) {
 	var response interface{}
-	if response, err = b.doPost("sendMessage", request); err != nil {
+	if response, err = b.doPost("sendMessage", request); err == nil {
 		result = response.(map[string]interface{})
 	}
 	return
 }
 
-// ForwardMessage forwads a message
+// ForwardMessage forwards messages of any kind
+// see https://core.telegram.org/bots/api#forwardmessage
 func (b *Bot) ForwardMessage(request O) (result O, err error) {
 	var response interface{}
-	if response, err = b.doPost("forwardMessage", request); err != nil {
+	if response, err = b.doPost("forwardMessage", request); err == nil {
+		result = response.(map[string]interface{})
+	}
+	return
+}
+
+// CopyMessage copy messages of any kind. The method is analogous to the method forwardMessage, but the copied message doesn't have a link to the original message.
+// see https://core.telegram.org/bots/api#copymessage
+func (b *Bot) CopyMessage(request O) (result O, err error) {
+	var response interface{}
+	if response, err = b.doPost("copyMessage", request); err == nil {
 		result = response.(map[string]interface{})
 	}
 	return
 }
 
 // SendPhoto sends a photo
+// see https://core.telegram.org/bots/api#sendphoto
 func (b *Bot) SendPhoto(request O) (result O, err error) {
 	var response interface{}
 	if response, err = b.doPostMultipart("sendPhoto", request); err == nil {
@@ -337,16 +358,8 @@ func (b *Bot) SendPhoto(request O) (result O, err error) {
 	return
 }
 
-// SendVideo sends a video
-func (b *Bot) SendVideo(request O) (result O, err error) {
-	var response interface{}
-	if response, err = b.doPostMultipart("sendVideo", request); err == nil {
-		result = response.(map[string]interface{})
-	}
-	return
-}
-
 // SendAudio sends an audio
+// see https://core.telegram.org/bots/api#sendaudio
 func (b *Bot) SendAudio(request O) (result O, err error) {
 	var response interface{}
 	if response, err = b.doPostMultipart("sendAudio", request); err == nil {
@@ -355,7 +368,28 @@ func (b *Bot) SendAudio(request O) (result O, err error) {
 	return
 }
 
+// SendVideo sends a video
+// see https://core.telegram.org/bots/api#senddocument
+func (b *Bot) SendDocument(request O) (result O, err error) {
+	var response interface{}
+	if response, err = b.doPostMultipart("sendDocument", request); err == nil {
+		result = response.(map[string]interface{})
+	}
+	return
+}
+
+// SendVideo sends a video
+// see https://core.telegram.org/bots/api#sendvideo
+func (b *Bot) SendVideo(request O) (result O, err error) {
+	var response interface{}
+	if response, err = b.doPostMultipart("sendVideo", request); err == nil {
+		result = response.(map[string]interface{})
+	}
+	return
+}
+
 // SendAnimation sends an animation
+// see https://core.telegram.org/bots/api#sendanimation
 func (b *Bot) SendAnimation(request O) (result O, err error) {
 	var response interface{}
 	if response, err = b.doPostMultipart("sendAnimation", request); err == nil {
@@ -365,6 +399,7 @@ func (b *Bot) SendAnimation(request O) (result O, err error) {
 }
 
 // SendVoice sends a voice
+// see https://core.telegram.org/bots/api#sendvoice
 func (b *Bot) SendVoice(request O) (result O, err error) {
 	var response interface{}
 	if response, err = b.doPostMultipart("sendVoice", request); err == nil {
@@ -373,7 +408,28 @@ func (b *Bot) SendVoice(request O) (result O, err error) {
 	return
 }
 
+// SendVoice sends a video note
+// see https://core.telegram.org/bots/api#sendvideonote
+func (b *Bot) SendVideoNote(request O) (result O, err error) {
+	var response interface{}
+	if response, err = b.doPostMultipart("sendVideoNote", request); err == nil {
+		result = response.(map[string]interface{})
+	}
+	return
+}
+
+// SendVoice sends a media group
+// see https://core.telegram.org/bots/api#sendmediagroup
+func (b *Bot) SendMediaGroup(request O) (result O, err error) {
+	var response interface{}
+	if response, err = b.doPostMultipart("sendMediaGroup", request); err == nil {
+		result = response.(map[string]interface{})
+	}
+	return
+}
+
 // SendLocation sends a location
+// see https://core.telegram.org/bots/api#sendlocation
 func (b *Bot) SendLocation(request O) (result O, err error) {
 	var response interface{}
 	if response, err = b.doPost("sendLocation", request); err == nil {
@@ -382,8 +438,138 @@ func (b *Bot) SendLocation(request O) (result O, err error) {
 	return
 }
 
-// TODO: complete Send* messages
-// SetWebhook implements setWebhook from Telegram Bot API
+// EditMessageLiveLocation sends a location
+// see https://core.telegram.org/bots/api#editmessagelivelocation
+func (b *Bot) EditMessageLiveLocation(request O) (result O, err error) {
+	var response interface{}
+	if response, err = b.doPost("editMessageLiveLocation", request); err == nil {
+		result = response.(map[string]interface{})
+	}
+	return
+}
+
+// StopMessageLiveLocation sends a location
+// see https://core.telegram.org/bots/api#stopmessagelivelocation
+func (b *Bot) StopMessageLiveLocation(request O) (result O, err error) {
+	var response interface{}
+	if response, err = b.doPost("stopMessageLiveLocation", request); err == nil {
+		result = response.(map[string]interface{})
+	}
+	return
+}
+
+// SendVenue sends a venue
+// see https://core.telegram.org/bots/api#sendvenue
+func (b *Bot) SendVenue(request O) (result O, err error) {
+	var response interface{}
+	if response, err = b.doPost("sendVenue", request); err == nil {
+		result = response.(map[string]interface{})
+	}
+	return
+}
+
+// SendContact sends a venue
+// see https://core.telegram.org/bots/api#sendcontact
+func (b *Bot) SendContact(request O) (result O, err error) {
+	var response interface{}
+	if response, err = b.doPost("sendContact", request); err == nil {
+		result = response.(map[string]interface{})
+	}
+	return
+}
+
+// SendPoll sends a poll
+// see https://core.telegram.org/bots/api#sendpoll
+func (b *Bot) SendPoll(request O) (result O, err error) {
+	var response interface{}
+	if response, err = b.doPost("sendPoll", request); err == nil {
+		result = response.(map[string]interface{})
+	}
+	return
+}
+
+// SendDice sends a dice
+// see https://core.telegram.org/bots/api#senddice
+func (b *Bot) SendDice(request O) (result O, err error) {
+	var response interface{}
+	if response, err = b.doPost("sendDice", request); err == nil {
+		result = response.(map[string]interface{})
+	}
+	return
+}
+
+// SendChatAction sends a chat action
+// see https://core.telegram.org/bots/api#sendchataction
+func (b *Bot) SendChatAction(request O) (result bool, err error) {
+	var response interface{}
+	if response, err = b.doPost("sendChatAction", request); err == nil {
+		result = response.(bool)
+	}
+	return
+}
+
+// GetUserProfilePhotos gets user profile photos.
+// see https://core.telegram.org/bots/api#getuserprofilephotos
+func (b *Bot) GetUserProfilePhotos(request O) (result O, err error) {
+	var response interface{}
+	if response, err = b.doPost("getUserProfilesPhotos", request); err == nil {
+		result = response.(map[string]interface{})
+	}
+	return
+}
+
+// GetFile gets basic info about a file and prepare it for downloading.
+// see https://core.telegram.org/bots/api#getfile
+func (b *Bot) GetFile(fileId string) (result O, err error) {
+	var response interface{}
+	if response, err = b.doGet("getFile?file_id="+fileId, nil); err == nil {
+		result = response.(map[string]interface{})
+	}
+	return
+}
+
+// KickChatMember kicks a user from a group, a supergroup or a channel.
+// see https://core.telegram.org/bots/api#kickchatmember
+func (b *Bot) KickChatMember(request O) (result O, err error) {
+	var response interface{}
+	if response, err = b.doPost("kickChatMember", request); err == nil {
+		result = response.(map[string]interface{})
+	}
+	return
+}
+
+// UnbanChatMember unban a previously kicked user in a supergroup or channel.
+// see https://core.telegram.org/bots/api#unbanchatmember
+func (b *Bot) UnbanChatMember(request O) (result O, err error) {
+	var response interface{}
+	if response, err = b.doPost("unbanChatMember", request); err == nil {
+		result = response.(map[string]interface{})
+	}
+	return
+}
+
+// RestrictChatMember unban a previously kicked user in a supergroup or channel.
+// see https://core.telegram.org/bots/api#restrictchatmember
+func (b *Bot) RestrictChatMember(request O) (result O, err error) {
+	var response interface{}
+	if response, err = b.doPost("restrictChatMember", request); err == nil {
+		result = response.(map[string]interface{})
+	}
+	return
+}
+
+// PromoteChatMember unban a previously kicked user in a supergroup or channel.
+// see https://core.telegram.org/bots/api#promotechatmember
+func (b *Bot) PromoteChatMember(request O) (result O, err error) {
+	var response interface{}
+	if response, err = b.doPost("promoteChatMember", request); err == nil {
+		result = response.(map[string]interface{})
+	}
+	return
+}
+
+// SetWebhook implements setWebhook from Telegram Bot API.
+// see https://core.telegram.org/bots/api#setwebhook
 func (b *Bot) SetWebhook(request O) (result bool, err error) {
 	var response interface{}
 	if response, err = b.doPost("setWebhook", request); err == nil {
@@ -393,6 +579,7 @@ func (b *Bot) SetWebhook(request O) (result bool, err error) {
 }
 
 // DeleteWebhook implements deleteWebhook from Telegram Bot API
+// see https://core.telegram.org/bots/api#deletewebhook
 func (b *Bot) DeleteWebhook(request O) (result bool, err error) {
 	var response interface{}
 	if response, err = b.doPost("deleteWebhook", request); err == nil {
@@ -401,50 +588,12 @@ func (b *Bot) DeleteWebhook(request O) (result bool, err error) {
 	return
 }
 
+// GetWebhookInfo get current webhook status
+// https://core.telegram.org/bots/api#getwebhookinfo
 func (b *Bot) GetWebhookInfo() (result O, err error) {
 	var response interface{}
 	if response, err = b.doGet("getWebhookInfo", result); err == nil {
 		result = response.(map[string]interface{})
-	}
-	return
-}
-
-func (b *Bot) GetFile(fileId string) (result O, err error) {
-	var response interface{}
-	if response, err = b.doGet("getFile?file_id="+fileId, nil); err == nil {
-		result = response.(map[string]interface{})
-	}
-	return
-}
-
-func (b *Bot) GetUserProfilePhotos(request O) (result O, err error) {
-	var response interface{}
-	if response, err = b.doPost("getUserProfilesPhotos", request); err == nil {
-		result = response.(map[string]interface{})
-	}
-	return
-}
-
-func (b *Bot) SendDice(request O) (result O, err error) {
-	var response interface{}
-	if response, err = b.doPost("sendDice", request); err == nil {
-		result = response.(map[string]interface{})
-	}
-	return
-}
-
-func (b *Bot) SendMediaGroup(request O) (result O, err error) {
-	var response interface{}
-	if response, err = b.doPost("sendMediaGroup", request); err == nil {
-		result = response.(map[string]interface{})
-	}
-	return
-}
-
-func (b *Bot) SendChatAction(request O) (result bool, err error) {
-	var response interface{}
-	if response, err = b.doPost("sendChatAction", request); err == nil {
-		result = response.(bool)
 	}
 	return
 }
