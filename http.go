@@ -69,6 +69,7 @@ func (h *httpApiClient) GetBytes(URL string) (result []byte, err error) {
 	return
 }
 
+// PostBytes perform a low level post requesto to the API server.
 func (h *httpApiClient) PostBytes(URL string, data interface{}) (result []byte, err error) {
 	var (
 		buffer []byte
@@ -90,6 +91,7 @@ func (h *httpApiClient) PostBytes(URL string, data interface{}) (result []byte, 
 	return
 }
 
+// PostJson perform a get to the API server. Get JSON encoded response payload.
 func (h *httpApiClient) GetJson(URL string) (result interface{}, err error) {
 	var buffer []byte
 	if buffer, err = h.GetBytes(URL); err != nil {
@@ -99,7 +101,7 @@ func (h *httpApiClient) GetJson(URL string) (result interface{}, err error) {
 	return
 }
 
-// PostJson
+// PostJson perform a JSON encoded post to the API server. Get JSON encoded response payload.
 func (h *httpApiClient) PostJson(URL string, request interface{}) (result interface{}, err error) {
 	var buffer []byte
 	if buffer, err = h.PostBytes(URL, request); err != nil {
@@ -109,7 +111,8 @@ func (h *httpApiClient) PostJson(URL string, request interface{}) (result interf
 	return
 }
 
-// Multipart POSTing (for sending objects)
+// PostMultipart posts a multipart encoded request body to the API server
+// Use this for sending files, photos, documents...
 func (h *httpApiClient) PostMultipart(URL string, request axon.O) (result interface{}, err error) {
 	// Prepare a form that you will submit to that URL.
 	var contentType string

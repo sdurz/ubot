@@ -2,6 +2,7 @@ package ubot
 
 import (
 	"context"
+	"reflect"
 	"testing"
 
 	"github.com/sdurz/axon"
@@ -277,6 +278,57 @@ func Test_matcherHandler_evaluate(t *testing.T) {
 			}
 			if gotResult != tt.wantResult {
 				t.Errorf("matcherHandler.evaluate() = %v, want %v", gotResult, tt.wantResult)
+			}
+		})
+	}
+}
+
+func Test_NewBot(t *testing.T) {
+	type args struct {
+		configuration *Configuration
+	}
+	tests := []struct {
+		name       string
+		args       args
+		wantResult *Bot
+	}{
+		{
+			name: "default workers",
+			args: args{
+				configuration: &Configuration{
+					APIToken: "!23",
+					WorkerNo: 0,
+				},
+			},
+			wantResult: &Bot{
+				Configuration: Configuration{
+					APIToken: "!23",
+					WorkerNo: 5,
+				},
+				apiClient: &httpApiClient{},
+			},
+		},
+		{
+			name: "exact workers",
+			args: args{
+				configuration: &Configuration{
+					APIToken: "!23",
+					WorkerNo: 10,
+				},
+			},
+			wantResult: &Bot{
+				Configuration: Configuration{
+					APIToken: "!23",
+					WorkerNo: 10,
+				},
+				apiClient: &httpApiClient{},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if gotResult := NewBot(tt.args.configuration); !reflect.DeepEqual(gotResult, tt.wantResult) {
+				t.Errorf("NewBot() = %v, want %v", gotResult, tt.wantResult)
 			}
 		})
 	}

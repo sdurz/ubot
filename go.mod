@@ -1,4 +1,4 @@
-module github.com/dual75/ubot
+module github.com/sdurz/ubot
 
 go 1.15
 

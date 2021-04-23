@@ -7,7 +7,7 @@ import (
 	"github.com/sdurz/axon"
 )
 
-func TestAnd(t *testing.T) {
+func Test_And(t *testing.T) {
 	type args struct {
 		matchers []UMatcher
 	}
@@ -55,7 +55,7 @@ func TestAnd(t *testing.T) {
 	}
 }
 
-func TestOr(t *testing.T) {
+func Test_Or(t *testing.T) {
 	type args struct {
 		matchers []UMatcher
 	}
@@ -103,7 +103,7 @@ func TestOr(t *testing.T) {
 	}
 }
 
-func TestIsFrom(t *testing.T) {
+func Test_IsFrom(t *testing.T) {
 	type args struct {
 		userID int64
 	}
@@ -121,9 +121,6 @@ func TestIsFrom(t *testing.T) {
 				"from": map[string]interface{}{
 					"id": 1234.,
 				},
-				"chat": map[string]interface{}{
-					"type": "private",
-				},
 			},
 		},
 		{
@@ -133,22 +130,6 @@ func TestIsFrom(t *testing.T) {
 			message: map[string]interface{}{
 				"from": map[string]interface{}{
 					"id": 1234.,
-				},
-				"chat": map[string]interface{}{
-					"type": "private",
-				},
-			},
-		},
-		{
-			name: "public nomatch",
-			args: args{1234},
-			want: false,
-			message: map[string]interface{}{
-				"from": map[string]interface{}{
-					"id": 1234.,
-				},
-				"chat": map[string]interface{}{
-					"type": "public",
 				},
 			},
 		},
@@ -163,7 +144,7 @@ func TestIsFrom(t *testing.T) {
 	}
 }
 
-func TestMessageHasCommand(t *testing.T) {
+func Test_MessageHasCommand(t *testing.T) {
 	type args struct {
 		bot    *Bot
 		entity string
@@ -242,7 +223,7 @@ func TestMessageHasCommand(t *testing.T) {
 	}
 }
 
-func TestMessageHasPhoto(t *testing.T) {
+func Test_MessageHasPhoto(t *testing.T) {
 	type args struct {
 		bot     *Bot
 		message axon.O
@@ -253,20 +234,22 @@ func TestMessageHasPhoto(t *testing.T) {
 		wantResult bool
 	}{
 		{
-			name: "has photo",
+			name: "ok",
 			args: args{
-				bot: &Bot{},
-				message: map[string]interface{}{
-					"photo": &axon.O{},
+				nil,
+				map[string]interface{}{
+					"photo": []interface{}{1, 2, 3},
 				},
 			},
 			wantResult: true,
 		},
 		{
-			name: "has photo",
+			name: "ok",
 			args: args{
-				bot:     &Bot{},
-				message: map[string]interface{}{},
+				nil,
+				map[string]interface{}{
+					"photoz": []interface{}{1, 2, 3},
+				},
 			},
 			wantResult: false,
 		},
@@ -275,6 +258,105 @@ func TestMessageHasPhoto(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if gotResult := MessageHasPhoto(tt.args.bot, tt.args.message); gotResult != tt.wantResult {
 				t.Errorf("MessageHasPhoto() = %v, want %v", gotResult, tt.wantResult)
+			}
+		})
+	}
+}
+
+func Test_MessageHasEntities(t *testing.T) {
+	type args struct {
+		bot     *Bot
+		message axon.O
+	}
+	tests := []struct {
+		name       string
+		args       args
+		wantResult bool
+	}{
+		{
+			name: "ok",
+			args: args{
+				nil,
+				map[string]interface{}{
+					"entities": []interface{}{1, 2, 3},
+				},
+			},
+			wantResult: true,
+		},
+		{
+			name: "ok",
+			args: args{
+				nil,
+				map[string]interface{}{
+					"photo": []interface{}{1, 2, 3},
+				},
+			},
+			wantResult: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if gotResult := MessageHasEntities(tt.args.bot, tt.args.message); gotResult != tt.wantResult {
+				t.Errorf("MessageHasEntities() = %v, want %v", gotResult, tt.wantResult)
+			}
+		})
+	}
+}
+
+func Test_MessageInGroup(t *testing.T) {
+	type args struct {
+		bot     *Bot
+		message axon.O
+	}
+	tests := []struct {
+		name       string
+		args       args
+		wantResult bool
+	}{
+		{
+			name: "ok group",
+			args: args{
+				nil,
+				map[string]interface{}{
+					"photo": []interface{}{1, 2, 3},
+					"chat": map[string]interface{}{
+						"type": "group",
+					},
+				},
+			},
+			wantResult: true,
+		},
+		{
+			name: "ok supergroup",
+			args: args{
+				nil,
+				map[string]interface{}{
+					"photo": []interface{}{1, 2, 3},
+					"chat": map[string]interface{}{
+						"type": "supergroup",
+					},
+				},
+			},
+			wantResult: true,
+		},
+		{
+			name: "ko private",
+			args: args{
+				nil,
+				map[string]interface{}{
+					"photo": []interface{}{1, 2, 3},
+					"chat": map[string]interface{}{
+						"type": "private",
+					},
+				},
+			},
+			wantResult: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if gotResult := MessageInGroup(tt.args.bot, tt.args.message); gotResult != tt.wantResult {
+				t.Errorf("MessageInGroup() = %v, want %v", gotResult, tt.wantResult)
 			}
 		})
 	}

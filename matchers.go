@@ -63,13 +63,47 @@ func IsFrom(userID int64) UMatcher {
 
 // MessageHasPhoto matches if updates has axon.A photo
 func MessageHasPhoto(bot *Bot, message axon.O) (result bool) {
-	_, result = message["photo"]
+	if _, err := message.GetArray("photo"); err == nil {
+		result = true
+	}
 	return
 }
 
 // MatchMessageEntities matches if update has message entities
 func MessageHasEntities(bot *Bot, message axon.O) (result bool) {
-	if _, err := message.Get("entities"); err != nil {
+	if _, err := message.GetArray("entities"); err == nil {
+		result = true
+	}
+	return
+}
+
+// MessageIsPrivate matchs is message chat type is private
+func MessageIsPrivate(bot *Bot, message axon.O) (result bool) {
+	var (
+		chatType string
+		err      error
+	)
+	if chatType, err = message.GetString("chat.type"); err != nil {
+		result = chatType == "private"
+	}
+	return
+}
+
+// MessageInGroup matches if a message is from a group
+func MessageInGroup(bot *Bot, message axon.O) (result bool) {
+	var (
+		chatType string
+		err      error
+	)
+	if chatType, err = message.GetString("chat.type"); err != nil {
+		return
+	}
+	switch chatType {
+	case "group":
+		result = true
+	case "supergroup":
+		result = true
+	default:
 		result = false
 	}
 	return
@@ -101,6 +135,7 @@ func MessageHasCommand(entity string) func(bot *Bot, message axon.O) (result boo
 		default:
 			isGroup = false
 		}
+
 		for _, ntt := range entities {
 			var (
 				ok     bool
