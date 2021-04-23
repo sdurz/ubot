@@ -5,13 +5,15 @@ import (
 	"encoding/json"
 	"io"
 	"mime/multipart"
+
+	"github.com/sdurz/axon"
 )
 
-type UHandler func(context.Context, *Bot, O) (bool, error)
-type UMatcher func(*Bot, O) bool
+type UHandler func(context.Context, *Bot, axon.O) (bool, error)
+type UMatcher func(*Bot, axon.O) bool
 
-type UpdateSourceFunc func(chan O, chan int, chan error)
-type UpdateCallbackFunc func(O) error
+type UpdateSourceFunc func(chan axon.O, chan int, chan error)
+type UpdateCallbackFunc func(axon.O) error
 
 type UMultipart interface {
 	asMIMEPart(string, *multipart.Writer) (fw io.Writer, fr io.Reader, err error)

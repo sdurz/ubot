@@ -11,6 +11,8 @@ import (
 	"strconv"
 	"sync"
 	"time"
+
+	"github.com/sdurz/axon"
 )
 
 // matcherHandler encapsulates an UMatcher and the corresponding UHandler
@@ -20,7 +22,7 @@ type matcherHandler struct {
 }
 
 // evaluate execute the handler func if the matcher returns true
-func (m *matcherHandler) evaluate(ctx context.Context, bot *Bot, message O) (result bool, err error) {
+func (m *matcherHandler) evaluate(ctx context.Context, bot *Bot, message axon.O) (result bool, err error) {
 	if m.matcher(bot, message) {
 		result, err = m.handler(ctx, bot, message)
 	}
@@ -69,7 +71,7 @@ func (b *Bot) methodURL(method string) (result string) {
 }
 
 // getUpdatesSource
-func (b *Bot) getUpdatesSource(ctx context.Context, updatesChan chan O) {
+func (b *Bot) getUpdatesSource(ctx context.Context, updatesChan chan axon.O) {
 	var nextUpdate int64 = 0
 	var ok bool
 	for {
@@ -86,7 +88,7 @@ func (b *Bot) getUpdatesSource(ctx context.Context, updatesChan chan O) {
 				continue
 			}
 
-			var updates A
+			var updates axon.A
 			if updates, ok = responseUpdates.([]interface{}); !ok {
 				log.Fatalln("updates result not a JSON array")
 			}
@@ -95,10 +97,10 @@ func (b *Bot) getUpdatesSource(ctx context.Context, updatesChan chan O) {
 				for _, update := range updates {
 					var (
 						updateID int64
-						oUpdate  O
+						oUpdate  axon.O
 					)
 					if oUpdate, ok = update.(map[string]interface{}); !ok {
-						log.Println("update not an O")
+						log.Println("update not an axon.O")
 						continue
 					}
 					if updateID, err = oUpdate.GetInteger("update_id"); err != nil {
@@ -116,12 +118,12 @@ func (b *Bot) getUpdatesSource(ctx context.Context, updatesChan chan O) {
 	}
 }
 
-func (b *Bot) serverSource(ctx context.Context, updatesChan chan O) {
+func (b *Bot) serverSource(ctx context.Context, updatesChan chan axon.O) {
 	serverHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var (
 			body      []byte
 			rawUpdate interface{}
-			update    O
+			update    axon.O
 			err       error
 			ok        bool
 		)
@@ -161,7 +163,7 @@ func (b *Bot) serverSource(ctx context.Context, updatesChan chan O) {
 		Handler: mux,
 	}
 
-	if ok, err := b.SetWebhook(O{"url": b.Configuration.WebhookUrl}); !ok || err != nil {
+	if ok, err := b.SetWebhook(axon.O{"url": b.Configuration.WebhookUrl}); !ok || err != nil {
 		log.Fatal("Can't set webhook")
 		return
 	}
@@ -196,7 +198,7 @@ func (b *Bot) Forever(ctx context.Context, wg *sync.WaitGroup) error {
 		log.Fatal(err)
 	}
 
-	updates := make(chan O)
+	updates := make(chan axon.O)
 	go source(ctx, updates)
 
 	semaphore := make(chan int, b.Configuration.WorkerNo)
@@ -215,13 +217,13 @@ func (b *Bot) Forever(ctx context.Context, wg *sync.WaitGroup) error {
 	}
 }
 
-func (b *Bot) process(ctx context.Context, update O) (err error) {
+func (b *Bot) process(ctx context.Context, update axon.O) (err error) {
 	var (
 		ok              bool
 		stop            bool
 		matcherHandlers []matcherHandler
 		rawPayload      interface{}
-		payload         O
+		payload         axon.O
 	)
 	if rawPayload, ok = update["message"]; ok {
 		matcherHandlers = b.messageMHs
@@ -241,7 +243,7 @@ func (b *Bot) process(ctx context.Context, update O) (err error) {
 		err = errors.New("update without data")
 	}
 	if payload, ok = rawPayload.(map[string]interface{}); !ok {
-		err = errors.New("update payload not an O")
+		err = errors.New("update payload not an axon.O")
 		return
 	}
 	if err == nil {
@@ -258,15 +260,15 @@ func (b *Bot) process(ctx context.Context, update O) (err error) {
 	return
 }
 
-func (b *Bot) doGet(method string, data O) (interface{}, error) {
+func (b *Bot) doGet(method string, data axon.O) (interface{}, error) {
 	return b.apiClient.GetJson(b.methodURL(method))
 }
 
-func (b *Bot) doPost(method string, request O) (interface{}, error) {
+func (b *Bot) doPost(method string, request axon.O) (interface{}, error) {
 	return b.apiClient.PostJson(b.methodURL(method), request)
 }
 
-func (b *Bot) doPostMultipart(method string, request O) (interface{}, error) {
+func (b *Bot) doPostMultipart(method string, request axon.O) (interface{}, error) {
 	return b.apiClient.PostMultipart(b.methodURL(method), request)
 }
 
@@ -320,7 +322,7 @@ func (b *Bot) Close() (err error) {
 
 // SendMessage sends a text message
 // see https://core.telegram.org/bots/api#sendmessage
-func (b *Bot) SendMessage(request O) (result O, err error) {
+func (b *Bot) SendMessage(request axon.O) (result axon.O, err error) {
 	var response interface{}
 	if response, err = b.doPost("sendMessage", request); err == nil {
 		result = response.(map[string]interface{})
@@ -330,7 +332,7 @@ func (b *Bot) SendMessage(request O) (result O, err error) {
 
 // ForwardMessage forwards messages of any kind
 // see https://core.telegram.org/bots/api#forwardmessage
-func (b *Bot) ForwardMessage(request O) (result O, err error) {
+func (b *Bot) ForwardMessage(request axon.O) (result axon.O, err error) {
 	var response interface{}
 	if response, err = b.doPost("forwardMessage", request); err == nil {
 		result = response.(map[string]interface{})
@@ -340,7 +342,7 @@ func (b *Bot) ForwardMessage(request O) (result O, err error) {
 
 // CopyMessage copy messages of any kind. The method is analogous to the method forwardMessage, but the copied message doesn't have a link to the original message.
 // see https://core.telegram.org/bots/api#copymessage
-func (b *Bot) CopyMessage(request O) (result O, err error) {
+func (b *Bot) CopyMessage(request axon.O) (result axon.O, err error) {
 	var response interface{}
 	if response, err = b.doPost("copyMessage", request); err == nil {
 		result = response.(map[string]interface{})
@@ -350,7 +352,7 @@ func (b *Bot) CopyMessage(request O) (result O, err error) {
 
 // SendPhoto sends a photo
 // see https://core.telegram.org/bots/api#sendphoto
-func (b *Bot) SendPhoto(request O) (result O, err error) {
+func (b *Bot) SendPhoto(request axon.O) (result axon.O, err error) {
 	var response interface{}
 	if response, err = b.doPostMultipart("sendPhoto", request); err == nil {
 		result = response.(map[string]interface{})
@@ -360,7 +362,7 @@ func (b *Bot) SendPhoto(request O) (result O, err error) {
 
 // SendAudio sends an audio
 // see https://core.telegram.org/bots/api#sendaudio
-func (b *Bot) SendAudio(request O) (result O, err error) {
+func (b *Bot) SendAudio(request axon.O) (result axon.O, err error) {
 	var response interface{}
 	if response, err = b.doPostMultipart("sendAudio", request); err == nil {
 		result = response.(map[string]interface{})
@@ -370,7 +372,7 @@ func (b *Bot) SendAudio(request O) (result O, err error) {
 
 // SendVideo sends a video
 // see https://core.telegram.org/bots/api#senddocument
-func (b *Bot) SendDocument(request O) (result O, err error) {
+func (b *Bot) SendDocument(request axon.O) (result axon.O, err error) {
 	var response interface{}
 	if response, err = b.doPostMultipart("sendDocument", request); err == nil {
 		result = response.(map[string]interface{})
@@ -380,7 +382,7 @@ func (b *Bot) SendDocument(request O) (result O, err error) {
 
 // SendVideo sends a video
 // see https://core.telegram.org/bots/api#sendvideo
-func (b *Bot) SendVideo(request O) (result O, err error) {
+func (b *Bot) SendVideo(request axon.O) (result axon.O, err error) {
 	var response interface{}
 	if response, err = b.doPostMultipart("sendVideo", request); err == nil {
 		result = response.(map[string]interface{})
@@ -390,7 +392,7 @@ func (b *Bot) SendVideo(request O) (result O, err error) {
 
 // SendAnimation sends an animation
 // see https://core.telegram.org/bots/api#sendanimation
-func (b *Bot) SendAnimation(request O) (result O, err error) {
+func (b *Bot) SendAnimation(request axon.O) (result axon.O, err error) {
 	var response interface{}
 	if response, err = b.doPostMultipart("sendAnimation", request); err == nil {
 		result = response.(map[string]interface{})
@@ -400,7 +402,7 @@ func (b *Bot) SendAnimation(request O) (result O, err error) {
 
 // SendVoice sends a voice
 // see https://core.telegram.org/bots/api#sendvoice
-func (b *Bot) SendVoice(request O) (result O, err error) {
+func (b *Bot) SendVoice(request axon.O) (result axon.O, err error) {
 	var response interface{}
 	if response, err = b.doPostMultipart("sendVoice", request); err == nil {
 		result = response.(map[string]interface{})
@@ -410,7 +412,7 @@ func (b *Bot) SendVoice(request O) (result O, err error) {
 
 // SendVoice sends a video note
 // see https://core.telegram.org/bots/api#sendvideonote
-func (b *Bot) SendVideoNote(request O) (result O, err error) {
+func (b *Bot) SendVideoNote(request axon.O) (result axon.O, err error) {
 	var response interface{}
 	if response, err = b.doPostMultipart("sendVideoNote", request); err == nil {
 		result = response.(map[string]interface{})
@@ -420,7 +422,7 @@ func (b *Bot) SendVideoNote(request O) (result O, err error) {
 
 // SendVoice sends a media group
 // see https://core.telegram.org/bots/api#sendmediagroup
-func (b *Bot) SendMediaGroup(request O) (result O, err error) {
+func (b *Bot) SendMediaGroup(request axon.O) (result axon.O, err error) {
 	var response interface{}
 	if response, err = b.doPostMultipart("sendMediaGroup", request); err == nil {
 		result = response.(map[string]interface{})
@@ -430,7 +432,7 @@ func (b *Bot) SendMediaGroup(request O) (result O, err error) {
 
 // SendLocation sends a location
 // see https://core.telegram.org/bots/api#sendlocation
-func (b *Bot) SendLocation(request O) (result O, err error) {
+func (b *Bot) SendLocation(request axon.O) (result axon.O, err error) {
 	var response interface{}
 	if response, err = b.doPost("sendLocation", request); err == nil {
 		result = response.(map[string]interface{})
@@ -440,7 +442,7 @@ func (b *Bot) SendLocation(request O) (result O, err error) {
 
 // EditMessageLiveLocation sends a location
 // see https://core.telegram.org/bots/api#editmessagelivelocation
-func (b *Bot) EditMessageLiveLocation(request O) (result O, err error) {
+func (b *Bot) EditMessageLiveLocation(request axon.O) (result axon.O, err error) {
 	var response interface{}
 	if response, err = b.doPost("editMessageLiveLocation", request); err == nil {
 		result = response.(map[string]interface{})
@@ -450,7 +452,7 @@ func (b *Bot) EditMessageLiveLocation(request O) (result O, err error) {
 
 // StopMessageLiveLocation sends a location
 // see https://core.telegram.org/bots/api#stopmessagelivelocation
-func (b *Bot) StopMessageLiveLocation(request O) (result O, err error) {
+func (b *Bot) StopMessageLiveLocation(request axon.O) (result axon.O, err error) {
 	var response interface{}
 	if response, err = b.doPost("stopMessageLiveLocation", request); err == nil {
 		result = response.(map[string]interface{})
@@ -460,7 +462,7 @@ func (b *Bot) StopMessageLiveLocation(request O) (result O, err error) {
 
 // SendVenue sends a venue
 // see https://core.telegram.org/bots/api#sendvenue
-func (b *Bot) SendVenue(request O) (result O, err error) {
+func (b *Bot) SendVenue(request axon.O) (result axon.O, err error) {
 	var response interface{}
 	if response, err = b.doPost("sendVenue", request); err == nil {
 		result = response.(map[string]interface{})
@@ -470,7 +472,7 @@ func (b *Bot) SendVenue(request O) (result O, err error) {
 
 // SendContact sends a venue
 // see https://core.telegram.org/bots/api#sendcontact
-func (b *Bot) SendContact(request O) (result O, err error) {
+func (b *Bot) SendContact(request axon.O) (result axon.O, err error) {
 	var response interface{}
 	if response, err = b.doPost("sendContact", request); err == nil {
 		result = response.(map[string]interface{})
@@ -480,7 +482,7 @@ func (b *Bot) SendContact(request O) (result O, err error) {
 
 // SendPoll sends a poll
 // see https://core.telegram.org/bots/api#sendpoll
-func (b *Bot) SendPoll(request O) (result O, err error) {
+func (b *Bot) SendPoll(request axon.O) (result axon.O, err error) {
 	var response interface{}
 	if response, err = b.doPost("sendPoll", request); err == nil {
 		result = response.(map[string]interface{})
@@ -490,7 +492,7 @@ func (b *Bot) SendPoll(request O) (result O, err error) {
 
 // SendDice sends a dice
 // see https://core.telegram.org/bots/api#senddice
-func (b *Bot) SendDice(request O) (result O, err error) {
+func (b *Bot) SendDice(request axon.O) (result axon.O, err error) {
 	var response interface{}
 	if response, err = b.doPost("sendDice", request); err == nil {
 		result = response.(map[string]interface{})
@@ -500,7 +502,7 @@ func (b *Bot) SendDice(request O) (result O, err error) {
 
 // SendChatAction sends a chat action
 // see https://core.telegram.org/bots/api#sendchataction
-func (b *Bot) SendChatAction(request O) (result bool, err error) {
+func (b *Bot) SendChatAction(request axon.O) (result bool, err error) {
 	var response interface{}
 	if response, err = b.doPost("sendChatAction", request); err == nil {
 		result = response.(bool)
@@ -510,7 +512,7 @@ func (b *Bot) SendChatAction(request O) (result bool, err error) {
 
 // GetUserProfilePhotos gets user profile photos.
 // see https://core.telegram.org/bots/api#getuserprofilephotos
-func (b *Bot) GetUserProfilePhotos(request O) (result O, err error) {
+func (b *Bot) GetUserProfilePhotos(request axon.O) (result axon.O, err error) {
 	var response interface{}
 	if response, err = b.doPost("getUserProfilesPhotos", request); err == nil {
 		result = response.(map[string]interface{})
@@ -520,7 +522,7 @@ func (b *Bot) GetUserProfilePhotos(request O) (result O, err error) {
 
 // GetFile gets basic info about a file and prepare it for downloading.
 // see https://core.telegram.org/bots/api#getfile
-func (b *Bot) GetFile(fileId string) (result O, err error) {
+func (b *Bot) GetFile(fileId string) (result axon.O, err error) {
 	var response interface{}
 	if response, err = b.doGet("getFile?file_id="+fileId, nil); err == nil {
 		result = response.(map[string]interface{})
@@ -530,7 +532,7 @@ func (b *Bot) GetFile(fileId string) (result O, err error) {
 
 // KickChatMember kicks a user from a group, a supergroup or a channel.
 // see https://core.telegram.org/bots/api#kickchatmember
-func (b *Bot) KickChatMember(request O) (result O, err error) {
+func (b *Bot) KickChatMember(request axon.O) (result axon.O, err error) {
 	var response interface{}
 	if response, err = b.doPost("kickChatMember", request); err == nil {
 		result = response.(map[string]interface{})
@@ -540,7 +542,7 @@ func (b *Bot) KickChatMember(request O) (result O, err error) {
 
 // UnbanChatMember unban a previously kicked user in a supergroup or channel.
 // see https://core.telegram.org/bots/api#unbanchatmember
-func (b *Bot) UnbanChatMember(request O) (result O, err error) {
+func (b *Bot) UnbanChatMember(request axon.O) (result axon.O, err error) {
 	var response interface{}
 	if response, err = b.doPost("unbanChatMember", request); err == nil {
 		result = response.(map[string]interface{})
@@ -550,7 +552,7 @@ func (b *Bot) UnbanChatMember(request O) (result O, err error) {
 
 // RestrictChatMember unban a previously kicked user in a supergroup or channel.
 // see https://core.telegram.org/bots/api#restrictchatmember
-func (b *Bot) RestrictChatMember(request O) (result O, err error) {
+func (b *Bot) RestrictChatMember(request axon.O) (result axon.O, err error) {
 	var response interface{}
 	if response, err = b.doPost("restrictChatMember", request); err == nil {
 		result = response.(map[string]interface{})
@@ -560,7 +562,7 @@ func (b *Bot) RestrictChatMember(request O) (result O, err error) {
 
 // PromoteChatMember unban a previously kicked user in a supergroup or channel.
 // see https://core.telegram.org/bots/api#promotechatmember
-func (b *Bot) PromoteChatMember(request O) (result O, err error) {
+func (b *Bot) PromoteChatMember(request axon.O) (result axon.O, err error) {
 	var response interface{}
 	if response, err = b.doPost("promoteChatMember", request); err == nil {
 		result = response.(map[string]interface{})
@@ -570,7 +572,7 @@ func (b *Bot) PromoteChatMember(request O) (result O, err error) {
 
 // SetWebhook implements setWebhook from Telegram Bot API.
 // see https://core.telegram.org/bots/api#setwebhook
-func (b *Bot) SetWebhook(request O) (result bool, err error) {
+func (b *Bot) SetWebhook(request axon.O) (result bool, err error) {
 	var response interface{}
 	if response, err = b.doPost("setWebhook", request); err == nil {
 		result = response.(bool)
@@ -580,7 +582,7 @@ func (b *Bot) SetWebhook(request O) (result bool, err error) {
 
 // DeleteWebhook implements deleteWebhook from Telegram Bot API
 // see https://core.telegram.org/bots/api#deletewebhook
-func (b *Bot) DeleteWebhook(request O) (result bool, err error) {
+func (b *Bot) DeleteWebhook(request axon.O) (result bool, err error) {
 	var response interface{}
 	if response, err = b.doPost("deleteWebhook", request); err == nil {
 		result = response.(bool)
@@ -590,7 +592,7 @@ func (b *Bot) DeleteWebhook(request O) (result bool, err error) {
 
 // GetWebhookInfo get current webhook status
 // https://core.telegram.org/bots/api#getwebhookinfo
-func (b *Bot) GetWebhookInfo() (result O, err error) {
+func (b *Bot) GetWebhookInfo() (result axon.O, err error) {
 	var response interface{}
 	if response, err = b.doGet("getWebhookInfo", result); err == nil {
 		result = response.(map[string]interface{})
@@ -598,7 +600,7 @@ func (b *Bot) GetWebhookInfo() (result O, err error) {
 	return
 }
 
-func (b *Bot) AnswerCallbackQuery(request O) (result bool, err error) {
+func (b *Bot) AnswerCallbackQuery(request axon.O) (result bool, err error) {
 	var response interface{}
 	if response, err = b.doPost("answerCallbackQuery", request); err == nil {
 		result = response.(bool)
@@ -606,7 +608,7 @@ func (b *Bot) AnswerCallbackQuery(request O) (result bool, err error) {
 	return
 }
 
-func (b *Bot) PinChatMessage(request O) (result bool, err error) {
+func (b *Bot) PinChatMessage(request axon.O) (result bool, err error) {
 	var response interface{}
 	if response, err = b.doPost("answerCallbackQuery", request); err == nil {
 		result = response.(bool)
@@ -614,7 +616,7 @@ func (b *Bot) PinChatMessage(request O) (result bool, err error) {
 	return
 }
 
-func (b *Bot) UnpinChatMessage(request O) (result bool, err error) {
+func (b *Bot) UnpinChatMessage(request axon.O) (result bool, err error) {
 	var response interface{}
 	if response, err = b.doPost("answerCallbackQuery", request); err == nil {
 		result = response.(bool)
@@ -622,7 +624,7 @@ func (b *Bot) UnpinChatMessage(request O) (result bool, err error) {
 	return
 }
 
-func (b *Bot) UnpinAllChatMessages(request O) (result bool, err error) {
+func (b *Bot) UnpinAllChatMessages(request axon.O) (result bool, err error) {
 	var response interface{}
 	if response, err = b.doPost("answerCallbackQuery", request); err == nil {
 		result = response.(bool)
@@ -630,7 +632,7 @@ func (b *Bot) UnpinAllChatMessages(request O) (result bool, err error) {
 	return
 }
 
-func (b *Bot) GetChat(request O) (result O, err error) {
+func (b *Bot) GetChat(request axon.O) (result axon.O, err error) {
 	var response interface{}
 	if response, err = b.doPost("getChat", request); err == nil {
 		result = response.(map[string]interface{})
@@ -638,7 +640,7 @@ func (b *Bot) GetChat(request O) (result O, err error) {
 	return
 }
 
-func (b *Bot) LeaveChat(request O) (result O, err error) {
+func (b *Bot) LeaveChat(request axon.O) (result axon.O, err error) {
 	var response interface{}
 	if response, err = b.doPost("leaveChat", request); err == nil {
 		result = response.(map[string]interface{})
@@ -646,7 +648,7 @@ func (b *Bot) LeaveChat(request O) (result O, err error) {
 	return
 }
 
-func (b *Bot) GetChatMembersCount(request O) (result int64, err error) {
+func (b *Bot) GetChatMembersCount(request axon.O) (result int64, err error) {
 	var response interface{}
 	if response, err = b.doPost("getChat", request); err == nil {
 		result = response.(int64)
@@ -654,7 +656,7 @@ func (b *Bot) GetChatMembersCount(request O) (result int64, err error) {
 	return
 }
 
-func (b *Bot) SetMyCommands(request O) (result O, err error) {
+func (b *Bot) SetMyCommands(request axon.O) (result axon.O, err error) {
 	var response interface{}
 	if response, err = b.doPost("setMyCommands", request); err == nil {
 		result = response.(map[string]interface{})
@@ -662,7 +664,7 @@ func (b *Bot) SetMyCommands(request O) (result O, err error) {
 	return
 }
 
-func (b *Bot) GetMyCommands() (result O, err error) {
+func (b *Bot) GetMyCommands() (result axon.O, err error) {
 	var response interface{}
 	if response, err = b.doGet("getMyCommands", result); err == nil {
 		result = response.(map[string]interface{})

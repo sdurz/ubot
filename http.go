@@ -13,6 +13,8 @@ import (
 	"net/textproto"
 	"strconv"
 	"strings"
+
+	"github.com/sdurz/axon"
 )
 
 type errEncoding string
@@ -44,7 +46,7 @@ type ApiClient interface {
 	PostBytes(URL string, data interface{}) (result []byte, err error)
 	GetJson(URL string) (result interface{}, err error)
 	PostJson(URL string, request interface{}) (result interface{}, err error)
-	PostMultipart(URL string, request O) (result interface{}, err error)
+	PostMultipart(URL string, request axon.O) (result interface{}, err error)
 }
 
 type httpApiClient struct {
@@ -68,46 +70,47 @@ func (h *httpApiClient) GetBytes(URL string) (result []byte, err error) {
 }
 
 func (h *httpApiClient) PostBytes(URL string, data interface{}) (result []byte, err error) {
-	reqBody, err := json.Marshal(data)
-	if err != nil {
+	var (
+		buffer []byte
+		resp   *http.Response
+	)
+	if buffer, err = json.Marshal(data); err != nil {
 		return
 	}
-
-	log.Println("posting request: ", string(reqBody))
-	resp, err := h.httpClient.Post(URL, "application/json", bytes.NewBuffer(reqBody))
-	if err != nil {
+	log.Println("posting request: ", string(buffer))
+	if resp, err = h.httpClient.Post(URL, "application/json", bytes.NewBuffer(buffer)); err != nil {
 		log.Fatal(err)
 		return
 	}
 	defer resp.Body.Close()
 
-	result, err = ioutil.ReadAll(resp.Body)
-	if err == nil {
+	if result, err = ioutil.ReadAll(resp.Body); err == nil {
 		log.Println("got response: ", string(result))
 	}
 	return
 }
 
 func (h *httpApiClient) GetJson(URL string) (result interface{}, err error) {
-	bytes, err := h.GetBytes(URL)
-	if err != nil {
+	var buffer []byte
+	if buffer, err = h.GetBytes(URL); err != nil {
 		return
 	}
-	result, err = decodeJsonResponse(bytes)
+	result, err = decodeJsonResponse(buffer)
 	return
 }
 
+// PostJson
 func (h *httpApiClient) PostJson(URL string, request interface{}) (result interface{}, err error) {
-	bytes, err := h.PostBytes(URL, request)
-	if err != nil {
+	var buffer []byte
+	if buffer, err = h.PostBytes(URL, request); err != nil {
 		return
 	}
-	result, err = decodeJsonResponse(bytes)
+	result, err = decodeJsonResponse(buffer)
 	return
 }
 
 // Multipart POSTing (for sending objects)
-func (h *httpApiClient) PostMultipart(URL string, request O) (result interface{}, err error) {
+func (h *httpApiClient) PostMultipart(URL string, request axon.O) (result interface{}, err error) {
 	// Prepare a form that you will submit to that URL.
 	var contentType string
 	var buffer *bytes.Buffer
@@ -190,7 +193,7 @@ func prepareSimpleValuePart(name string, value interface{}, writer *multipart.Wr
 
 func prepareComplexValuePart(name string, value interface{}, writer *multipart.Writer) (fw io.Writer, fr io.Reader, err error) {
 	switch value.(type) {
-	case O, A:
+	case axon.O, axon.A:
 		var dataBytes []byte
 		if dataBytes, err = json.Marshal(value); err != nil {
 			return

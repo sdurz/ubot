@@ -3,6 +3,8 @@ package ubot
 import (
 	"reflect"
 	"testing"
+
+	"github.com/sdurz/axon"
 )
 
 func TestAnd(t *testing.T) {
@@ -18,10 +20,10 @@ func TestAnd(t *testing.T) {
 			name: "and ok",
 			args: args{
 				matchers: []UMatcher{
-					func(b *Bot, o O) bool {
+					func(b *Bot, o axon.O) bool {
 						return true
 					},
-					func(b *Bot, o O) bool {
+					func(b *Bot, o axon.O) bool {
 						return true
 					},
 				},
@@ -32,10 +34,10 @@ func TestAnd(t *testing.T) {
 			name: "and ko",
 			args: args{
 				matchers: []UMatcher{
-					func(b *Bot, o O) bool {
+					func(b *Bot, o axon.O) bool {
 						return true
 					},
-					func(b *Bot, o O) bool {
+					func(b *Bot, o axon.O) bool {
 						return false
 					},
 				},
@@ -46,7 +48,7 @@ func TestAnd(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := And(tt.args.matchers...)(nil, O{}); !reflect.DeepEqual(got, tt.want) {
+			if got := And(tt.args.matchers...)(nil, axon.O{}); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("And() = %v, want %v", got, tt.want)
 			}
 		})
@@ -66,10 +68,10 @@ func TestOr(t *testing.T) {
 			name: "or ok",
 			args: args{
 				matchers: []UMatcher{
-					func(b *Bot, o O) bool {
+					func(b *Bot, o axon.O) bool {
 						return false
 					},
-					func(b *Bot, o O) bool {
+					func(b *Bot, o axon.O) bool {
 						return true
 					},
 				},
@@ -80,10 +82,10 @@ func TestOr(t *testing.T) {
 			name: "or ko",
 			args: args{
 				matchers: []UMatcher{
-					func(b *Bot, o O) bool {
+					func(b *Bot, o axon.O) bool {
 						return false
 					},
-					func(b *Bot, o O) bool {
+					func(b *Bot, o axon.O) bool {
 						return false
 					},
 				},
@@ -94,7 +96,7 @@ func TestOr(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := Or(tt.args.matchers...)(nil, O{}); !reflect.DeepEqual(got, tt.want) {
+			if got := Or(tt.args.matchers...)(nil, axon.O{}); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("And() = %v, want %v", got, tt.want)
 			}
 		})
@@ -103,8 +105,7 @@ func TestOr(t *testing.T) {
 
 func TestIsFrom(t *testing.T) {
 	type args struct {
-		userID   int64
-		chatType string
+		userID int64
 	}
 	tests := []struct {
 		name    string
@@ -114,7 +115,7 @@ func TestIsFrom(t *testing.T) {
 	}{
 		{
 			name: "private match",
-			args: args{1234, "private"},
+			args: args{1234},
 			want: true,
 			message: map[string]interface{}{
 				"from": map[string]interface{}{
@@ -127,7 +128,7 @@ func TestIsFrom(t *testing.T) {
 		},
 		{
 			name: "private nomatch",
-			args: args{12345, "private"},
+			args: args{12345},
 			want: false,
 			message: map[string]interface{}{
 				"from": map[string]interface{}{
@@ -140,7 +141,7 @@ func TestIsFrom(t *testing.T) {
 		},
 		{
 			name: "public nomatch",
-			args: args{1234, "private"},
+			args: args{1234},
 			want: false,
 			message: map[string]interface{}{
 				"from": map[string]interface{}{
@@ -155,7 +156,7 @@ func TestIsFrom(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := IsFrom(tt.args.userID, tt.args.chatType)(nil, tt.message); !reflect.DeepEqual(got, tt.want) {
+			if got := IsFrom(tt.args.userID)(nil, tt.message); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("IsFrom() = %v, want %v", got, tt.want)
 			}
 		})
@@ -164,8 +165,8 @@ func TestIsFrom(t *testing.T) {
 
 func TestMessageHasCommand(t *testing.T) {
 	type args struct {
-		entity   string
-		chatType string
+		bot    *Bot
+		entity string
 	}
 	tests := []struct {
 		name    string
@@ -174,15 +175,67 @@ func TestMessageHasCommand(t *testing.T) {
 		message map[string]interface{}
 	}{
 		{
-			name:    "command don't match",
-			args:    args{"/cmd", "private"},
-			want:    false,
-			message: map[string]interface{}{},
+			name: "command match",
+			args: args{nil, "/cmd"},
+			want: true,
+			message: map[string]interface{}{
+				"chat": map[string]interface{}{
+					"type": "private",
+				},
+				"text": "123/cmd",
+				"entities": []interface{}{
+					map[string]interface{}{
+						"offset": 3.,
+						"length": 4.,
+					},
+				},
+			},
+		},
+		{
+			name: "command match in group",
+			args: args{
+				bot: &Bot{
+					BotUser: UUser{
+						Username: "testuser",
+					},
+				},
+				entity: "/cmd",
+			},
+			want: true,
+			message: map[string]interface{}{
+				"chat": map[string]interface{}{
+					"type": "group",
+				},
+				"text": "123/cmd@testuser",
+				"entities": []interface{}{
+					map[string]interface{}{
+						"offset": 3.,
+						"length": 13.,
+					},
+				},
+			},
+		},
+		{
+			name: "command don't extsts",
+			args: args{nil, "/cmd"},
+			want: false,
+			message: map[string]interface{}{
+				"chat": map[string]interface{}{
+					"type": "private",
+				},
+				"text": "123/entity",
+				"entities": []interface{}{
+					map[string]interface{}{
+						"offset": 3.,
+						"length": 7.,
+					},
+				},
+			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := MessageHasCommand(tt.args.entity, tt.args.chatType)(nil, O{}); !reflect.DeepEqual(got, tt.want) {
+			if got := MessageHasCommand(tt.args.entity)(tt.args.bot, tt.message); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("MessageHasCommand() = %v, want %v", got, tt.want)
 			}
 		})
@@ -192,7 +245,7 @@ func TestMessageHasCommand(t *testing.T) {
 func TestMessageHasPhoto(t *testing.T) {
 	type args struct {
 		bot     *Bot
-		message O
+		message axon.O
 	}
 	tests := []struct {
 		name       string
@@ -204,7 +257,7 @@ func TestMessageHasPhoto(t *testing.T) {
 			args: args{
 				bot: &Bot{},
 				message: map[string]interface{}{
-					"photo": &O{},
+					"photo": &axon.O{},
 				},
 			},
 			wantResult: true,

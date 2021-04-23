@@ -3,6 +3,8 @@ package ubot
 import (
 	"context"
 	"testing"
+
+	"github.com/sdurz/axon"
 )
 
 func TestBot_process(t *testing.T) {
@@ -21,24 +23,24 @@ func TestBot_process(t *testing.T) {
 	}
 	type args struct {
 		ctx    context.Context
-		update O
+		update axon.O
 	}
 
 	var invocations int
 	mhStop := matcherHandler{
-		matcher: func(*Bot, O) bool {
+		matcher: func(*Bot, axon.O) bool {
 			return true
 		},
-		handler: func(context.Context, *Bot, O) (bool, error) {
+		handler: func(context.Context, *Bot, axon.O) (bool, error) {
 			invocations++
 			return true, nil
 		},
 	}
 	mhContinue := matcherHandler{
-		matcher: func(*Bot, O) bool {
+		matcher: func(*Bot, axon.O) bool {
 			return true
 		},
-		handler: func(context.Context, *Bot, O) (bool, error) {
+		handler: func(context.Context, *Bot, axon.O) (bool, error) {
 			invocations++
 			return false, nil
 		},
@@ -57,7 +59,7 @@ func TestBot_process(t *testing.T) {
 				messageMHs: []matcherHandler{mhStop},
 			},
 			args: args{
-				update: O{
+				update: axon.O{
 					"message": map[string]interface{}{},
 				},
 			},
@@ -70,7 +72,7 @@ func TestBot_process(t *testing.T) {
 				messageMHs: []matcherHandler{mhStop, mhContinue},
 			},
 			args: args{
-				update: O{
+				update: axon.O{
 					"message": map[string]interface{}{},
 				},
 			},
@@ -83,7 +85,7 @@ func TestBot_process(t *testing.T) {
 				messageMHs: []matcherHandler{mhContinue, mhContinue},
 			},
 			args: args{
-				update: O{
+				update: axon.O{
 					"message": map[string]interface{}{},
 				},
 			},
@@ -96,7 +98,7 @@ func TestBot_process(t *testing.T) {
 				editedMessageMHs: []matcherHandler{mhStop},
 			},
 			args: args{
-				update: O{
+				update: axon.O{
 					"edited_message": map[string]interface{}{},
 				},
 			},
@@ -109,7 +111,7 @@ func TestBot_process(t *testing.T) {
 				channelPostMHs: []matcherHandler{mhStop},
 			},
 			args: args{
-				update: O{
+				update: axon.O{
 					"channel_post": map[string]interface{}{},
 				},
 			},
@@ -122,7 +124,7 @@ func TestBot_process(t *testing.T) {
 				editedChannelPostMHs: []matcherHandler{mhStop},
 			},
 			args: args{
-				update: O{
+				update: axon.O{
 					"edited_channel_post": map[string]interface{}{},
 				},
 			},
@@ -135,7 +137,7 @@ func TestBot_process(t *testing.T) {
 				callbackQueryMHs: []matcherHandler{mhStop},
 			},
 			args: args{
-				update: O{
+				update: axon.O{
 					"callback_query": map[string]interface{}{},
 				},
 			},
@@ -148,7 +150,7 @@ func TestBot_process(t *testing.T) {
 				inlineQueryMHs: []matcherHandler{mhStop},
 			},
 			args: args{
-				update: O{
+				update: axon.O{
 					"inline_query": map[string]interface{}{},
 				},
 			},
@@ -161,7 +163,7 @@ func TestBot_process(t *testing.T) {
 				chosenInlineResultMHs: []matcherHandler{mhStop},
 			},
 			args: args{
-				update: O{
+				update: axon.O{
 					"chosen_inline_result": map[string]interface{}{},
 				},
 			},
@@ -215,7 +217,7 @@ func Test_matcherHandler_evaluate(t *testing.T) {
 	type args struct {
 		ctx     context.Context
 		bot     *Bot
-		message O
+		message axon.O
 	}
 	bot := &Bot{}
 	tests := []struct {
@@ -228,10 +230,10 @@ func Test_matcherHandler_evaluate(t *testing.T) {
 		{
 			name: "match and return true",
 			fields: fields{
-				matcher: func(*Bot, O) bool {
+				matcher: func(*Bot, axon.O) bool {
 					return true
 				},
-				handler: func(context.Context, *Bot, O) (bool, error) {
+				handler: func(context.Context, *Bot, axon.O) (bool, error) {
 					return true, nil
 				},
 			},
@@ -246,10 +248,10 @@ func Test_matcherHandler_evaluate(t *testing.T) {
 		{
 			name: "don;t match and would return true",
 			fields: fields{
-				matcher: func(*Bot, O) bool {
+				matcher: func(*Bot, axon.O) bool {
 					return false
 				},
-				handler: func(context.Context, *Bot, O) (bool, error) {
+				handler: func(context.Context, *Bot, axon.O) (bool, error) {
 					return true, nil
 				},
 			},
