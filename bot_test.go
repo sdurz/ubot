@@ -2,9 +2,12 @@ package ubot
 
 import (
 	"context"
+	"errors"
 	"reflect"
+	"strings"
 	"testing"
 
+	"github.com/dual75/ubot"
 	"github.com/sdurz/axon"
 )
 
@@ -329,6 +332,211 @@ func Test_NewBot(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if gotResult := NewBot(tt.args.configuration); !reflect.DeepEqual(gotResult, tt.wantResult) {
 				t.Errorf("NewBot() = %v, want %v", gotResult, tt.wantResult)
+			}
+		})
+	}
+}
+
+type mockAPIClient struct {
+	method          string
+	bytesMethod     func() []byte
+	interfaceMethod func() interface{}
+}
+
+func (m *mockAPIClient) GetBytes(URL string) (result []byte, err error) {
+	if !strings.Contains(URL, m.method) {
+		err = errors.New("path don't match method")
+	} else {
+		result = m.bytesMethod()
+	}
+	return
+}
+
+func (m *mockAPIClient) PostBytes(URL string, data interface{}) (result []byte, err error) {
+	if !strings.Contains(URL, m.method) {
+		err = errors.New("path don't match method")
+	} else {
+		result = m.bytesMethod()
+	}
+	return
+}
+
+func (m *mockAPIClient) GetJson(URL string) (result interface{}, err error) {
+	if !strings.Contains(URL, m.method) {
+		err = errors.New("path don't match method")
+	} else {
+		result = m.interfaceMethod()
+	}
+	return
+}
+func (m *mockAPIClient) PostJson(URL string, request interface{}) (result interface{}, err error) {
+	if !strings.Contains(URL, m.method) {
+		err = errors.New("path don't match method")
+	} else {
+		result = m.interfaceMethod()
+	}
+	return
+}
+func (m *mockAPIClient) PostMultipart(URL string, request axon.O) (result interface{}, err error) {
+	if !strings.Contains(URL, m.method) {
+		err = errors.New("path don't match method")
+	} else {
+		result = m.interfaceMethod()
+	}
+	return
+}
+
+func TestBot_GetMyCommands(t *testing.T) {
+	type fields struct {
+		Configuration         Configuration
+		apiClient             APIClient
+		BotUser               UUser
+		messageMHs            []matcherHandler
+		editedMessageMHs      []matcherHandler
+		channelPostMHs        []matcherHandler
+		editedChannelPostMHs  []matcherHandler
+		inlineQueryMHs        []matcherHandler
+		chosenInlineResultMHs []matcherHandler
+		callbackQueryMHs      []matcherHandler
+		myChatMemberMHs       []matcherHandler
+		chatMemberMHs         []matcherHandler
+	}
+	tests := []struct {
+		name       string
+		fields     fields
+		wantResult axon.O
+		wantErr    bool
+	}{
+		{
+			name: "test1",
+			fields: fields{
+				apiClient: &mockAPIClient{
+					method: "getMyCommands",
+					interfaceMethod: func() interface{} {
+						return map[string]interface{}{
+							"response": true,
+						}
+					},
+					bytesMethod: func() []byte {
+						return []byte("")
+					},
+				},
+			},
+			wantResult: map[string]interface{}{
+				"response": true,
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			b := &Bot{
+				Configuration:         tt.fields.Configuration,
+				apiClient:             tt.fields.apiClient,
+				BotUser:               tt.fields.BotUser,
+				messageMHs:            tt.fields.messageMHs,
+				editedMessageMHs:      tt.fields.editedMessageMHs,
+				channelPostMHs:        tt.fields.channelPostMHs,
+				editedChannelPostMHs:  tt.fields.editedChannelPostMHs,
+				inlineQueryMHs:        tt.fields.inlineQueryMHs,
+				chosenInlineResultMHs: tt.fields.chosenInlineResultMHs,
+				callbackQueryMHs:      tt.fields.callbackQueryMHs,
+				myChatMemberMHs:       tt.fields.myChatMemberMHs,
+				chatMemberMHs:         tt.fields.chatMemberMHs,
+			}
+			gotResult, err := b.GetMyCommands()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Bot.GetMyCommands() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(gotResult, tt.wantResult) {
+				t.Errorf("Bot.GetMyCommands() = %v, want %v", gotResult, tt.wantResult)
+			}
+		})
+	}
+}
+
+func TestBot_GetMe(t *testing.T) {
+	type fields struct {
+		Configuration         Configuration
+		apiClient             APIClient
+		BotUser               UUser
+		messageMHs            []matcherHandler
+		editedMessageMHs      []matcherHandler
+		channelPostMHs        []matcherHandler
+		editedChannelPostMHs  []matcherHandler
+		inlineQueryMHs        []matcherHandler
+		chosenInlineResultMHs []matcherHandler
+		callbackQueryMHs      []matcherHandler
+		myChatMemberMHs       []matcherHandler
+		chatMemberMHs         []matcherHandler
+	}
+	tests := []struct {
+		name       string
+		fields     fields
+		wantResult axon.O
+		wantErr    bool
+	}{
+		{
+			name: "test1",
+			fields: fields{
+				apiClient: &mockAPIClient{
+					method: "getMe",
+					interfaceMethod: func() interface{} {
+						return map[string]interface{}{
+							"id":                          123456.,
+							"is_bot":                      true,
+							"first_name":                  "A",
+							"last_name":                   "B",
+							"username":                    "botuser",
+							"language_code":               "it",
+							"can_join_groups":             true,
+							"can_read_all_group_messages": true,
+							"supports_inline_queries":     true,
+						}
+					},
+					bytesMethod: func() []byte {
+						return []byte("")
+					},
+				},
+			},
+			wantResult: ubot.UUser{
+				ID:                      123456,
+				IsBot:                   true,
+				FirstName:               "A",
+				LastName:                "B",
+				Username:                "botuser",
+				LanguageCode:            "it",
+				CanJoinGroups:           true,
+				CanReadAllGroupMessages: true,
+				SupportsInlineQueries:   true,
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			b := &Bot{
+				Configuration:         tt.fields.Configuration,
+				apiClient:             tt.fields.apiClient,
+				BotUser:               tt.fields.BotUser,
+				messageMHs:            tt.fields.messageMHs,
+				editedMessageMHs:      tt.fields.editedMessageMHs,
+				channelPostMHs:        tt.fields.channelPostMHs,
+				editedChannelPostMHs:  tt.fields.editedChannelPostMHs,
+				inlineQueryMHs:        tt.fields.inlineQueryMHs,
+				chosenInlineResultMHs: tt.fields.chosenInlineResultMHs,
+				callbackQueryMHs:      tt.fields.callbackQueryMHs,
+				myChatMemberMHs:       tt.fields.myChatMemberMHs,
+				chatMemberMHs:         tt.fields.chatMemberMHs,
+			}
+			gotResult, err := b.GetMe()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Bot.GetMe() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(gotResult, tt.wantResult) {
+				t.Errorf("Bot.GetMe() = %v, want %v", gotResult, tt.wantResult)
 			}
 		})
 	}

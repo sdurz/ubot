@@ -26,9 +26,9 @@ type UUser struct {
 	LastName                string `json:"last_name,omitempty"`
 	Username                string `json:"username,omitempty"`
 	LanguageCode            string `json:"language_code,omitempty"`
-	CanJoinGroup            string `json:"can_join_groups,omitempty"`
-	CanReadAllGroupMessages string `json:"can_read_all_group_messages,omitempty"`
-	SupportsInlineQueries   string `json:"supports_inline_queries,omitempty"`
+	CanJoinGroups           bool   `json:"can_join_groups,omitempty"`
+	CanReadAllGroupMessages bool   `json:"can_read_all_group_messages,omitempty"`
+	SupportsInlineQueries   bool   `json:"supports_inline_queries,omitempty"`
 }
 
 type UReply struct {

@@ -41,7 +41,7 @@ func decodeJsonResponse(bytes []byte) (result interface{}, err error) {
 	return
 }
 
-type ApiClient interface {
+type APIClient interface {
 	GetBytes(URl string) (result []byte, err error)
 	PostBytes(URL string, data interface{}) (result []byte, err error)
 	GetJson(URL string) (result interface{}, err error)
@@ -120,7 +120,7 @@ func (h *httpApiClient) PostMultipart(URL string, request axon.O) (result interf
 	if contentType, buffer, err = prepareMultipart(request); err != nil {
 		return
 	}
-	log.Println(string(buffer.Bytes()))
+	log.Println(buffer.String())
 
 	// Submit the request
 	var resp *http.Response

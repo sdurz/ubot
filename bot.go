@@ -33,7 +33,7 @@ func (m *matcherHandler) evaluate(ctx context.Context, bot *Bot, message axon.O)
 // It implements a bot API frontend.
 type Bot struct {
 	Configuration         Configuration
-	apiClient             ApiClient
+	apiClient             APIClient
 	BotUser               UUser
 	messageMHs            []matcherHandler
 	editedMessageMHs      []matcherHandler
@@ -157,7 +157,7 @@ func (b *Bot) serverSource(ctx context.Context, updatesChan chan axon.O) {
 	}
 
 	mux := http.NewServeMux()
-	mux.Handle(b.Configuration.WebhookUrl, serverHandler)
+	mux.Handle("/bot/"+b.Configuration.APIToken, serverHandler)
 	srv := &http.Server{
 		Addr:    b.Configuration.ServerPort,
 		Handler: mux,
@@ -301,9 +301,28 @@ func (b *Bot) AddMyChatMemberHandler(matcher UMatcher, handler UHandler) {
 // GetMe returns basic information about the bot in form of a User object.
 // see https://core.telegram.org/bots/api#getme
 func (b *Bot) GetMe() (result *UUser, err error) {
-	result = &UUser{}
-	_, err = b.doGet("getMe", nil)
-	return
+	var (
+		uResult UUser
+		iResult interface{}
+		oResult axon.O
+		ok      bool
+	)
+	if iResult, err = b.doGet("getMe", nil); err != nil {
+		if oResult, ok = iResult.(map[string]interface{}); !ok {
+			err = errors.New("doGet returned unexpected type")
+			return
+		}
+		uResult.ID, _ = oResult.GetInteger("id")
+		uResult.IsBot, _ = oResult.GetBoolean("is_bot")
+		uResult.FirstName, _ = oResult.GetString("first_name")
+		uResult.LastName, _ = oResult.GetString("last_name")
+		uResult.Username, _ = oResult.GetString("username")
+		uResult.LanguageCode, _ = oResult.GetString("language_code")
+		uResult.CanJoinGroups, _ = oResult.GetBoolean("can_join_groups")
+		uResult.CanReadAllGroupMessages, _ = oResult.GetBoolean("can_read_all_group_messages")
+		uResult.SupportsInlineQueries, _ = oResult.GetBoolean("supports_inline_queries")
+	}
+	return &uResult, err
 }
 
 // LogOut logs the bot out of the cloud Bot API server
