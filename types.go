@@ -12,7 +12,7 @@ import (
 type UHandler func(context.Context, *Bot, axon.O) (bool, error)
 type UMatcher func(*Bot, axon.O) bool
 
-type UpdateSourceFunc func(chan axon.O, chan int, chan error)
+type UpdatesSource func(*Bot, context.Context, chan axon.O)
 type UpdateCallbackFunc func(axon.O) error
 
 type UMultipart interface {

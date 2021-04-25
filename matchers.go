@@ -83,7 +83,7 @@ func MessageIsPrivate(bot *Bot, message axon.O) (result bool) {
 		chatType string
 		err      error
 	)
-	if chatType, err = message.GetString("chat.type"); err != nil {
+	if chatType, err = message.GetString("chat.type"); err == nil {
 		result = chatType == "private"
 	}
 	return

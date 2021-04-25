@@ -33,7 +33,7 @@ func (m *matcherHandler) evaluate(ctx context.Context, bot *Bot, message axon.O)
 // It implements a bot API frontend.
 type Bot struct {
 	Configuration         Configuration
-	apiClient             APIClient
+	apiClient             apiClient
 	BotUser               UUser
 	messageMHs            []matcherHandler
 	editedMessageMHs      []matcherHandler
@@ -70,8 +70,9 @@ func (b *Bot) methodURL(method string) (result string) {
 	return
 }
 
-// getUpdatesSource
-func (b *Bot) getUpdatesSource(ctx context.Context, updatesChan chan axon.O) {
+// GetUpdatesSource is a ServerSource tha get updates vi long polling
+// See https://core.telegram.org/bots/api#getupdates
+func GetUpdatesSource(bot *Bot, ctx context.Context, updatesChan chan axon.O) {
 	var nextUpdate int64 = 0
 	var ok bool
 	for {
@@ -80,9 +81,9 @@ func (b *Bot) getUpdatesSource(ctx context.Context, updatesChan chan axon.O) {
 			log.Println("done with getUpdatesSource")
 			return
 		default:
-			getURL := b.methodURL("getUpdates") + "?offset=" + strconv.FormatInt(nextUpdate, 10)
+			getURL := bot.methodURL("getUpdates") + "?offset=" + strconv.FormatInt(nextUpdate, 10)
 			var responseUpdates interface{}
-			responseUpdates, err := b.apiClient.GetJson(getURL)
+			responseUpdates, err := bot.apiClient.GetJson(getURL)
 			if err != nil {
 				log.Println("Error while retrieving updates", err)
 				continue
@@ -118,7 +119,9 @@ func (b *Bot) getUpdatesSource(ctx context.Context, updatesChan chan axon.O) {
 	}
 }
 
-func (b *Bot) serverSource(ctx context.Context, updatesChan chan axon.O) {
+// HttpServerSource is ServerSource that receives updates by exposing an http endpoint.
+// The endpoint is exposed at http://hostname:<port>/bot<apiToken>.
+func HttpServerSource(bot *Bot, ctx context.Context, updatesChan chan axon.O) {
 	serverHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var (
 			body      []byte
@@ -147,27 +150,27 @@ func (b *Bot) serverSource(ctx context.Context, updatesChan chan axon.O) {
 			return
 		}
 
-		if err = b.process(ctx, update); err != nil {
+		if err = bot.process(ctx, update); err != nil {
 			log.Println("Update processing error: ", err)
 		}
 	})
 
-	if b.Configuration.WebhookUrl == "" {
+	if bot.Configuration.WebhookUrl == "" {
 		log.Fatal("empty webhook url")
 	}
 
 	mux := http.NewServeMux()
-	mux.Handle("/bot/"+b.Configuration.APIToken, serverHandler)
+	mux.Handle("/bot"+bot.Configuration.APIToken, serverHandler)
 	srv := &http.Server{
-		Addr:    b.Configuration.ServerPort,
+		Addr:    bot.Configuration.ServerPort,
 		Handler: mux,
 	}
 
-	if ok, err := b.SetWebhook(axon.O{"url": b.Configuration.WebhookUrl}); !ok || err != nil {
+	if ok, err := bot.SetWebhook(axon.O{"url": bot.Configuration.WebhookUrl}); !ok || err != nil {
 		log.Fatal("Can't set webhook")
 		return
 	}
-	go http.ListenAndServe(b.Configuration.ServerPort, mux)
+	go http.ListenAndServe(bot.Configuration.ServerPort, mux)
 	<-ctx.Done()
 
 	ctxShutDown, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -184,13 +187,8 @@ func (b *Bot) AddChatMemberHandler(matcher UMatcher, handler UHandler) {
 	b.chatMemberMHs = append(b.chatMemberMHs, matcherHandler{matcher: matcher, handler: handler})
 }
 
-func (b *Bot) Forever(ctx context.Context, wg *sync.WaitGroup) error {
+func (b *Bot) Forever(ctx context.Context, wg *sync.WaitGroup, source UpdatesSource) error {
 	defer wg.Done()
-
-	source := b.serverSource
-	if b.Configuration.LongPoll {
-		source = b.getUpdatesSource
-	}
 
 	if user, err := b.GetMe(); err == nil {
 		b.BotUser = *user
@@ -199,7 +197,7 @@ func (b *Bot) Forever(ctx context.Context, wg *sync.WaitGroup) error {
 	}
 
 	updates := make(chan axon.O)
-	go source(ctx, updates)
+	go source(b, ctx, updates)
 
 	semaphore := make(chan int, b.Configuration.WorkerNo)
 	for {
@@ -307,7 +305,7 @@ func (b *Bot) GetMe() (result *UUser, err error) {
 		oResult axon.O
 		ok      bool
 	)
-	if iResult, err = b.doGet("getMe", nil); err != nil {
+	if iResult, err = b.doGet("getMe", nil); err == nil {
 		if oResult, ok = iResult.(map[string]interface{}); !ok {
 			err = errors.New("doGet returned unexpected type")
 			return
@@ -619,6 +617,8 @@ func (b *Bot) GetWebhookInfo() (result axon.O, err error) {
 	return
 }
 
+// AnswerCallbackQuery send an answer to the given callback query
+// https://core.telegram.org/bots/api#answercallbackquery
 func (b *Bot) AnswerCallbackQuery(request axon.O) (result bool, err error) {
 	var response interface{}
 	if response, err = b.doPost("answerCallbackQuery", request); err == nil {
@@ -627,6 +627,8 @@ func (b *Bot) AnswerCallbackQuery(request axon.O) (result bool, err error) {
 	return
 }
 
+// PinChatMessage pins a message for the given chat
+// https://core.telegram.org/bots/api#pinchatmessage
 func (b *Bot) PinChatMessage(request axon.O) (result bool, err error) {
 	var response interface{}
 	if response, err = b.doPost("answerCallbackQuery", request); err == nil {

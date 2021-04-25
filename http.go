@@ -41,7 +41,9 @@ func decodeJsonResponse(bytes []byte) (result interface{}, err error) {
 	return
 }
 
-type APIClient interface {
+// ApiClient serves as a mocking wrapper for http.Client
+// there's no need to export this
+type apiClient interface {
 	GetBytes(URl string) (result []byte, err error)
 	PostBytes(URL string, data interface{}) (result []byte, err error)
 	GetJson(URL string) (result interface{}, err error)
