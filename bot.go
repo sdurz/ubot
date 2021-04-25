@@ -34,7 +34,7 @@ func (m *matcherHandler) evaluate(ctx context.Context, bot *Bot, message axon.O)
 type Bot struct {
 	Configuration         Configuration
 	apiClient             apiClient
-	BotUser               UUser
+	BotUser               User
 	messageMHs            []matcherHandler
 	editedMessageMHs      []matcherHandler
 	channelPostMHs        []matcherHandler
@@ -298,9 +298,9 @@ func (b *Bot) AddMyChatMemberHandler(matcher UMatcher, handler UHandler) {
 
 // GetMe returns basic information about the bot in form of a User object.
 // see https://core.telegram.org/bots/api#getme
-func (b *Bot) GetMe() (result *UUser, err error) {
+func (b *Bot) GetMe() (result *User, err error) {
 	var (
-		uResult UUser
+		uResult User
 		iResult interface{}
 		oResult axon.O
 		ok      bool

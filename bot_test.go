@@ -13,7 +13,7 @@ import (
 func TestBot_process(t *testing.T) {
 	type fields struct {
 		Configuration         Configuration
-		BotUser               UUser
+		BotUser               User
 		messageMHs            []matcherHandler
 		editedMessageMHs      []matcherHandler
 		channelPostMHs        []matcherHandler
@@ -389,7 +389,7 @@ func TestBot_GetMyCommands(t *testing.T) {
 	type fields struct {
 		Configuration         Configuration
 		apiClient             apiClient
-		BotUser               UUser
+		BotUser               User
 		messageMHs            []matcherHandler
 		editedMessageMHs      []matcherHandler
 		channelPostMHs        []matcherHandler
@@ -459,7 +459,7 @@ func TestBot_GetMe(t *testing.T) {
 	type fields struct {
 		Configuration         Configuration
 		apiClient             apiClient
-		BotUser               UUser
+		BotUser               User
 		messageMHs            []matcherHandler
 		editedMessageMHs      []matcherHandler
 		channelPostMHs        []matcherHandler
@@ -473,7 +473,7 @@ func TestBot_GetMe(t *testing.T) {
 	tests := []struct {
 		name       string
 		fields     fields
-		wantResult UUser
+		wantResult User
 		wantErr    bool
 	}{
 		{
@@ -499,7 +499,7 @@ func TestBot_GetMe(t *testing.T) {
 					},
 				},
 			},
-			wantResult: UUser{
+			wantResult: User{
 				ID:                      123456,
 				IsBot:                   true,
 				FirstName:               "A",
@@ -545,7 +545,7 @@ func TestBot_LogOut(t *testing.T) {
 	type fields struct {
 		Configuration         Configuration
 		apiClient             apiClient
-		BotUser               UUser
+		BotUser               User
 		messageMHs            []matcherHandler
 		editedMessageMHs      []matcherHandler
 		channelPostMHs        []matcherHandler
@@ -604,7 +604,7 @@ func TestBot_Close(t *testing.T) {
 	type fields struct {
 		Configuration         Configuration
 		apiClient             apiClient
-		BotUser               UUser
+		BotUser               User
 		messageMHs            []matcherHandler
 		editedMessageMHs      []matcherHandler
 		channelPostMHs        []matcherHandler
@@ -663,7 +663,7 @@ func TestBot_SendMessage(t *testing.T) {
 	type fields struct {
 		Configuration         Configuration
 		apiClient             apiClient
-		BotUser               UUser
+		BotUser               User
 		messageMHs            []matcherHandler
 		editedMessageMHs      []matcherHandler
 		channelPostMHs        []matcherHandler
@@ -735,7 +735,7 @@ func TestBot_ForwardMessage(t *testing.T) {
 	type fields struct {
 		Configuration         Configuration
 		apiClient             apiClient
-		BotUser               UUser
+		BotUser               User
 		messageMHs            []matcherHandler
 		editedMessageMHs      []matcherHandler
 		channelPostMHs        []matcherHandler
@@ -807,7 +807,7 @@ func TestBot_CopyMessage(t *testing.T) {
 	type fields struct {
 		Configuration         Configuration
 		apiClient             apiClient
-		BotUser               UUser
+		BotUser               User
 		messageMHs            []matcherHandler
 		editedMessageMHs      []matcherHandler
 		channelPostMHs        []matcherHandler

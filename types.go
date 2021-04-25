@@ -2,24 +2,23 @@ package ubot
 
 import (
 	"context"
-	"encoding/json"
-	"io"
-	"mime/multipart"
 
 	"github.com/sdurz/axon"
 )
 
+// UHandler is a function that will handle an API update
 type UHandler func(context.Context, *Bot, axon.O) (bool, error)
+
+// UMatcher is a function that will decide wheter an update will be handled by a UMatcher
 type UMatcher func(*Bot, axon.O) bool
 
+// UpdatesSource are function that will get updates from the API server or any other source
+// and publish them onto a channel.
+// A proper UpdateSource will handle the context argument as needed.
 type UpdatesSource func(*Bot, context.Context, chan axon.O)
-type UpdateCallbackFunc func(axon.O) error
 
-type UMultipart interface {
-	asMIMEPart(string, *multipart.Writer) (fw io.Writer, fr io.Reader, err error)
-}
-
-type UUser struct {
+// User struct stores user infos for the bot user
+type User struct {
 	ID                      int64  `json:"id"`
 	IsBot                   bool   `json:"is_bot"`
 	FirstName               string `json:"first_name"`
@@ -29,11 +28,4 @@ type UUser struct {
 	CanJoinGroups           bool   `json:"can_join_groups,omitempty"`
 	CanReadAllGroupMessages bool   `json:"can_read_all_group_messages,omitempty"`
 	SupportsInlineQueries   bool   `json:"supports_inline_queries,omitempty"`
-}
-
-type UReply struct {
-	Ok          bool            `json:"ok"`
-	ErrorCode   int64           `json:"error_code,omitempty"`
-	Description string          `json:"description,omitempty"`
-	Result      json.RawMessage `json:"result"`
 }

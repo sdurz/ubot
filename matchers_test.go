@@ -176,7 +176,7 @@ func Test_MessageHasCommand(t *testing.T) {
 			name: "command match in group",
 			args: args{
 				bot: &Bot{
-					BotUser: UUser{
+					BotUser: User{
 						Username: "testuser",
 					},
 				},
