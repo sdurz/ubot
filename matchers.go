@@ -28,6 +28,12 @@ func Or(matchers ...UMatcher) UMatcher {
 	}
 }
 
+func Not(matcher UMatcher) UMatcher {
+	return func(b *Bot, u axon.O) bool {
+		return !matcher(b, u)
+	}
+}
+
 func Always(bot *Bot, update axon.O) (result bool) {
 	result = true
 	return
