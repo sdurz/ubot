@@ -54,10 +54,10 @@ func NewBot(configuration *Configuration) (result *Bot) {
 	return
 }
 
-// matcherHandler encapsulates an UMatcher and the corresponding UHandler
+// matcherHandler encapsulates an Matcher and the corresponding Handler
 type matcherHandler struct {
-	matcher UMatcher
-	handler UHandler
+	matcher Matcher
+	handler Handler
 }
 
 // evaluate execute the handler func if the matcher returns true
@@ -69,67 +69,67 @@ func (m *matcherHandler) evaluate(ctx context.Context, bot *Bot, message axon.O)
 }
 
 // AddMessageHandler adds an handler for message updates.
-func (b *Bot) AddMessageHandler(matcher UMatcher, handler UHandler) {
+func (b *Bot) AddMessageHandler(matcher Matcher, handler Handler) {
 	b.messageMHs = append(b.messageMHs, matcherHandler{matcher: matcher, handler: handler})
 }
 
 // AddEditedMessageHandler adds an handler for edited_message updates.
-func (b *Bot) AddEditedMessageHandler(matcher UMatcher, handler UHandler) {
+func (b *Bot) AddEditedMessageHandler(matcher Matcher, handler Handler) {
 	b.editedMessageMHs = append(b.editedMessageMHs, matcherHandler{matcher: matcher, handler: handler})
 }
 
 // AddChannelPostHandler adds an handler for channel_post updates.
-func (b *Bot) AddChannelPostHandler(matcher UMatcher, handler UHandler) {
+func (b *Bot) AddChannelPostHandler(matcher Matcher, handler Handler) {
 	b.channelPostMHs = append(b.channelPostMHs, matcherHandler{matcher: matcher, handler: handler})
 }
 
 // AddEditedChannelPostHandler adds an handler for edited_channel_post updates.
-func (b *Bot) AddEditedChannelPostHandler(matcher UMatcher, handler UHandler) {
+func (b *Bot) AddEditedChannelPostHandler(matcher Matcher, handler Handler) {
 	b.editedChannelPostMHs = append(b.editedChannelPostMHs, matcherHandler{matcher: matcher, handler: handler})
 }
 
 // AddInlineQueryHandler adds an handler for inline_query updates.
-func (b *Bot) AddInlineQueryHandler(matcher UMatcher, handler UHandler) {
+func (b *Bot) AddInlineQueryHandler(matcher Matcher, handler Handler) {
 	b.inlineQueryMHs = append(b.inlineQueryMHs, matcherHandler{matcher: matcher, handler: handler})
 }
 
 // AddChosenInlineResultHandler adds an handler for inline_query updates.
-func (b *Bot) AddChosenInlineResultHandler(matcher UMatcher, handler UHandler) {
+func (b *Bot) AddChosenInlineResultHandler(matcher Matcher, handler Handler) {
 	b.chosenInlineResultMHs = append(b.chosenInlineResultMHs, matcherHandler{matcher: matcher, handler: handler})
 }
 
 // AddCallbackQueryHandler adds an handler for callback_query updates.
-func (b *Bot) AddCallbackQueryHandler(matcher UMatcher, handler UHandler) {
+func (b *Bot) AddCallbackQueryHandler(matcher Matcher, handler Handler) {
 	b.callbackQueryMHs = append(b.callbackQueryMHs, matcherHandler{matcher: matcher, handler: handler})
 }
 
 // AddShippingQueryHandler adds an handler for callback_query updates.
-func (b *Bot) AddShippingQueryHandler(matcher UMatcher, handler UHandler) {
+func (b *Bot) AddShippingQueryHandler(matcher Matcher, handler Handler) {
 	b.shippingQueryMHs = append(b.shippingQueryMHs, matcherHandler{matcher: matcher, handler: handler})
 }
 
 // AddPreCheckoutQueryHandler adds an handler for callback_query updates.
-func (b *Bot) AddPreCheckoutQueryHandler(matcher UMatcher, handler UHandler) {
+func (b *Bot) AddPreCheckoutQueryHandler(matcher Matcher, handler Handler) {
 	b.preCheckoutQueryMHs = append(b.preCheckoutQueryMHs, matcherHandler{matcher: matcher, handler: handler})
 }
 
 // AddPollHandler adds an handler for callback_query updates.
-func (b *Bot) AddPollHandler(matcher UMatcher, handler UHandler) {
+func (b *Bot) AddPollHandler(matcher Matcher, handler Handler) {
 	b.pollMHs = append(b.pollMHs, matcherHandler{matcher: matcher, handler: handler})
 }
 
 // AddPollAnswerHandler adds an handler for callback_query updates.
-func (b *Bot) AddPollAnswerHandler(matcher UMatcher, handler UHandler) {
+func (b *Bot) AddPollAnswerHandler(matcher Matcher, handler Handler) {
 	b.pollAnswerMHs = append(b.pollAnswerMHs, matcherHandler{matcher: matcher, handler: handler})
 }
 
 // AddMyChatMemberHandler adds an handler for my_chat_member updates.
-func (b *Bot) AddMyChatMemberHandler(matcher UMatcher, handler UHandler) {
+func (b *Bot) AddMyChatMemberHandler(matcher Matcher, handler Handler) {
 	b.myChatMemberMHs = append(b.myChatMemberMHs, matcherHandler{matcher: matcher, handler: handler})
 }
 
 // AddChatMemberHandler adds an handler for chat_member updates.
-func (b *Bot) AddChatMemberHandler(matcher UMatcher, handler UHandler) {
+func (b *Bot) AddChatMemberHandler(matcher Matcher, handler Handler) {
 	b.chatMemberMHs = append(b.chatMemberMHs, matcherHandler{matcher: matcher, handler: handler})
 }
 

@@ -9,7 +9,7 @@ import (
 
 func Test_And(t *testing.T) {
 	type args struct {
-		matchers []UMatcher
+		matchers []Matcher
 	}
 	tests := []struct {
 		name string
@@ -19,7 +19,7 @@ func Test_And(t *testing.T) {
 		{
 			name: "and ok",
 			args: args{
-				matchers: []UMatcher{
+				matchers: []Matcher{
 					func(b *Bot, o axon.O) bool {
 						return true
 					},
@@ -33,7 +33,7 @@ func Test_And(t *testing.T) {
 		{
 			name: "and ko",
 			args: args{
-				matchers: []UMatcher{
+				matchers: []Matcher{
 					func(b *Bot, o axon.O) bool {
 						return true
 					},
@@ -57,7 +57,7 @@ func Test_And(t *testing.T) {
 
 func Test_Or(t *testing.T) {
 	type args struct {
-		matchers []UMatcher
+		matchers []Matcher
 	}
 	tests := []struct {
 		name string
@@ -67,7 +67,7 @@ func Test_Or(t *testing.T) {
 		{
 			name: "or ok",
 			args: args{
-				matchers: []UMatcher{
+				matchers: []Matcher{
 					func(b *Bot, o axon.O) bool {
 						return false
 					},
@@ -81,7 +81,7 @@ func Test_Or(t *testing.T) {
 		{
 			name: "or ko",
 			args: args{
-				matchers: []UMatcher{
+				matchers: []Matcher{
 					func(b *Bot, o axon.O) bool {
 						return false
 					},

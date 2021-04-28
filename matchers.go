@@ -6,7 +6,7 @@ import (
 	"github.com/sdurz/axon"
 )
 
-func And(matchers ...UMatcher) UMatcher {
+func And(matchers ...Matcher) Matcher {
 	return func(b *Bot, u axon.O) bool {
 		for _, matcher := range matchers {
 			if !matcher(b, u) {
@@ -17,7 +17,7 @@ func And(matchers ...UMatcher) UMatcher {
 	}
 }
 
-func Or(matchers ...UMatcher) UMatcher {
+func Or(matchers ...Matcher) Matcher {
 	return func(b *Bot, u axon.O) bool {
 		for _, matcher := range matchers {
 			if matcher(b, u) {
@@ -28,7 +28,7 @@ func Or(matchers ...UMatcher) UMatcher {
 	}
 }
 
-func Not(matcher UMatcher) UMatcher {
+func Not(matcher Matcher) Matcher {
 	return func(b *Bot, u axon.O) bool {
 		return !matcher(b, u)
 	}
@@ -40,7 +40,7 @@ func Always(bot *Bot, update axon.O) (result bool) {
 }
 
 // ChatType matches axon.A certain chat type
-func ChatType(chatType string) UMatcher {
+func ChatType(chatType string) Matcher {
 	return func(bot *Bot, message axon.O) (result bool) {
 		var (
 			err   error
@@ -54,7 +54,7 @@ func ChatType(chatType string) UMatcher {
 }
 
 // IsFrom matches private messages from axon.A known userID
-func IsFrom(userID int64) UMatcher {
+func IsFrom(userID int64) Matcher {
 	return func(bot *Bot, message axon.O) (result bool) {
 		var (
 			err   error

@@ -51,20 +51,20 @@ func main() (result *ubot.Bot, err error) {
 
 ```
 
-## UMatcher and UHandler
+## Matcher and Handler
 
-An UMatcher is a func that is executed to check wheter an update is to be handled:
+An Matcher is a func that is executed to check wheter an update is to be handled:
 
 ```golang
-type UMatcher func(*Bot, O) bool
+type Matcher func(*Bot, O) bool
 ```
 
-An UHandler is a func that actually handles the incoming payload:
+An Handler is a func that actually handles the incoming payload:
 ```golang
-type UHandler func(context.Context, *Bot, O) (bool, error)
+type Handler func(context.Context, *Bot, O) (bool, error)
 ```
 
-UMatcher(s) can be reused and composed, _uBot_ provides quite a few boolean operators that help to compose simpler matchers.
+Matcher(s) can be reused and composed, _uBot_ provides quite a few boolean operators that help to compose simpler matchers.
 
 ## Caveats
 Methods mapping is still not complete.

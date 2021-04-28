@@ -6,11 +6,11 @@ import (
 	"github.com/sdurz/axon"
 )
 
-// UHandler is a function that will handle an API update
-type UHandler func(context.Context, *Bot, axon.O) (bool, error)
+// Handler is a function that will handle an API update
+type Handler func(context.Context, *Bot, axon.O) (bool, error)
 
-// UMatcher is a function that will decide wheter an update will be handled by a UMatcher
-type UMatcher func(*Bot, axon.O) bool
+// Matcher is a function that will decide wheter an update will be handled by a Matcher
+type Matcher func(*Bot, axon.O) bool
 
 // UpdatesSource are function that will get updates from the API server or any other source
 // and publish them onto a channel.

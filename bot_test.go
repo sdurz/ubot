@@ -212,8 +212,8 @@ func TestBot_methodURL(t *testing.T) {
 
 func Test_matcherHandler_evaluate(t *testing.T) {
 	type fields struct {
-		matcher UMatcher
-		handler UHandler
+		matcher Matcher
+		handler Handler
 	}
 	type args struct {
 		ctx     context.Context
