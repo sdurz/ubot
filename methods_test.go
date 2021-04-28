@@ -390,18 +390,8 @@ func TestBot_ForwardMessage(t *testing.T) {
 
 func TestBot_CopyMessage(t *testing.T) {
 	type fields struct {
-		Configuration         Configuration
-		apiClient             apiClient
-		BotUser               User
-		messageMHs            []matcherHandler
-		editedMessageMHs      []matcherHandler
-		channelPostMHs        []matcherHandler
-		editedChannelPostMHs  []matcherHandler
-		inlineQueryMHs        []matcherHandler
-		chosenInlineResultMHs []matcherHandler
-		callbackQueryMHs      []matcherHandler
-		myChatMemberMHs       []matcherHandler
-		chatMemberMHs         []matcherHandler
+		Configuration Configuration
+		apiClient     apiClient
 	}
 	type args struct {
 		request axon.O
@@ -435,18 +425,8 @@ func TestBot_CopyMessage(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			b := &Bot{
-				Configuration:         tt.fields.Configuration,
-				apiClient:             tt.fields.apiClient,
-				BotUser:               tt.fields.BotUser,
-				messageMHs:            tt.fields.messageMHs,
-				editedMessageMHs:      tt.fields.editedMessageMHs,
-				channelPostMHs:        tt.fields.channelPostMHs,
-				editedChannelPostMHs:  tt.fields.editedChannelPostMHs,
-				inlineQueryMHs:        tt.fields.inlineQueryMHs,
-				chosenInlineResultMHs: tt.fields.chosenInlineResultMHs,
-				callbackQueryMHs:      tt.fields.callbackQueryMHs,
-				myChatMemberMHs:       tt.fields.myChatMemberMHs,
-				chatMemberMHs:         tt.fields.chatMemberMHs,
+				Configuration: tt.fields.Configuration,
+				apiClient:     tt.fields.apiClient,
 			}
 			gotResult, err := b.CopyMessage(tt.args.request)
 			if (err != nil) != tt.wantErr {
@@ -469,7 +449,7 @@ func TestBot_GetMyCommands(t *testing.T) {
 	tests := []struct {
 		name       string
 		fields     fields
-		wantResult []interface{}
+		wantResult axon.A
 		wantErr    bool
 	}{
 		{
@@ -485,7 +465,7 @@ func TestBot_GetMyCommands(t *testing.T) {
 					},
 				},
 			},
-			wantResult: []interface{}{
+			wantResult: axon.A{
 				1,
 				2,
 				3,
@@ -507,6 +487,100 @@ func TestBot_GetMyCommands(t *testing.T) {
 			}
 			if !reflect.DeepEqual(gotResult, tt.wantResult) {
 				t.Errorf("Bot.GetMyCommands() = %v, want %v", gotResult, tt.wantResult)
+			}
+		})
+	}
+}
+
+func TestBot_SetMyCommands(t *testing.T) {
+	type fields struct {
+		Configuration Configuration
+		apiClient     apiClient
+	}
+	type args struct {
+		request axon.O
+	}
+	tests := []struct {
+		name       string
+		fields     fields
+		args       args
+		wantResult bool
+		wantErr    bool
+	}{
+		{
+			name: "test1",
+			fields: fields{
+				apiClient: &mockAPIClient{
+					method: "setMyCommands",
+					interfaceMethod: func() interface{} {
+						return true
+					},
+					bytesMethod: func() []byte {
+						return []byte("true")
+					},
+				},
+			},
+			wantResult: true,
+			wantErr:    false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			b := &Bot{
+				Configuration: tt.fields.Configuration,
+				apiClient:     tt.fields.apiClient,
+			}
+			gotResult, err := b.SetMyCommands(tt.args.request)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Bot.SetMyCommands() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if gotResult != tt.wantResult {
+				t.Errorf("Bot.SetMyCommands() = %v, want %v", gotResult, tt.wantResult)
+			}
+		})
+	}
+}
+
+func TestBot_AnswerCallbackQuery(t *testing.T) {
+	type fields struct {
+		apiClient apiClient
+	}
+	tests := []struct {
+		name       string
+		fields     fields
+		wantResult bool
+		wantErr    bool
+	}{
+		{
+			name: "test1",
+			fields: fields{
+				apiClient: &mockAPIClient{
+					method: "answerCallbackQuery",
+					interfaceMethod: func() interface{} {
+						return true
+					},
+					bytesMethod: func() []byte {
+						return []byte("true")
+					},
+				},
+			},
+			wantResult: true,
+			wantErr:    false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			b := &Bot{
+				apiClient: tt.fields.apiClient,
+			}
+			gotResult, err := b.AnswerCallbackQuery(nil)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Bot.AnswerCallbackQuery() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if gotResult != tt.wantResult {
+				t.Errorf("Bot.AnswerCallbackQuery() = %v, want %v", gotResult, tt.wantResult)
 			}
 		})
 	}
