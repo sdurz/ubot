@@ -30,18 +30,15 @@ func ServerSource(bot *Bot, ctx context.Context, updatesChan chan axon.O) {
 			return
 		}
 		log.Println(string(body))
-
 		if err = json.Unmarshal(body, rawUpdate); err != nil {
 			log.Printf("Error decoding body: %v", err)
 			http.Error(w, "can't decode body", http.StatusBadRequest)
 			return
 		}
-
 		if update, ok = rawUpdate.(map[string]interface{}); !ok {
 			log.Printf("Error decoding body: %v", err)
 			return
 		}
-
 		if err = bot.process(ctx, update); err != nil {
 			log.Println("Update processing error: ", err)
 		}
@@ -57,7 +54,6 @@ func ServerSource(bot *Bot, ctx context.Context, updatesChan chan axon.O) {
 		Addr:    bot.Configuration.ServerPort,
 		Handler: mux,
 	}
-
 	if ok, err := bot.SetWebhook(axon.O{"url": bot.Configuration.WebhookUrl}); !ok || err != nil {
 		log.Fatal("Can't set webhook")
 		return

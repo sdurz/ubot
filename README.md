@@ -3,10 +3,30 @@ uBot is a minimalistic Telegram BOT API library for Golang that aims to be compl
 
 ## Overview
 uBot is a bot framework for Telegram Bot API that I'm writing to support my own bot implementations. 
-Instead of providing a full API mapping, uBot relies on a minimal wrapping of Golang JSON marshal/unmarshal functionalities, with JSON accessor methods. It also offers a simple but extensible mechanism for message routing and filtering that allows the developers to write, reuse and compose their own matchers and handlers.
+Instead of providing a full API mapping, uBot relies on [axon](https://github.com/sdurz/axon) for JSON handling, which in turn is a minimal wrapper around Golang JSON marshal/unmarshal functionalities.
 
-The method of Telegram bot API are mappped one on one to the Bot object, the messages that are sent to the server are to be composed as specified on Telegram's reference. There's no need to memorize an additional
-layer nor coding conventions (in turn there's no guarantee that the sent messages are well formed, beware of 400's error).
+It features a simple but extensible mechanism for message routing and filtering that allows the developers to write, reuse and compose their own [matchers](https://pkg.go.dev/github.com/sdurz/ubot#Matcher) and [handlers](https://pkg.go.dev/github.com/sdurz/ubot#Handler).
+
+The methods of Telegram bot API are mappped one on one onto the [Bot](https://pkg.go.dev/github.com/sdurz/ubot#Bot) object. 
+
+The messages that are sent to the server are to be composed as specified on [Telegram's BOT API reference](https://core.telegram.org/bots/api). There's no need to memorize an additional layer nor coding conventions (in turn there's no guarantee that the sent messages are well formed, beware of HTTP 400 errors). 
+
+Messages are plain _axon_ objects:
+
+```golang
+sentMsg, err := bot.SendMessage(axon.O{
+	"chat_id": 123456789,
+	"text": "Hello uBot!",
+})
+```
+
+same are responses. You can access JSON properties with the dotted notation:
+
+```golang
+sentMsg.GetInteger()
+
+```
+
 
 Strengths or uBot are:
 - Minimal footprint

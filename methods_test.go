@@ -585,3 +585,231 @@ func TestBot_AnswerCallbackQuery(t *testing.T) {
 		})
 	}
 }
+
+func TestBot_DeleteChatStickerSet(t *testing.T) {
+	type fields struct {
+		apiClient apiClient
+	}
+	tests := []struct {
+		name       string
+		fields     fields
+		wantResult bool
+		wantErr    bool
+	}{
+		{
+			name: "test1",
+			fields: fields{
+				apiClient: &mockAPIClient{
+					method: "deleteChatStickerSet",
+					interfaceMethod: func() interface{} {
+						return true
+					},
+					bytesMethod: func() []byte {
+						return []byte("true")
+					},
+				},
+			},
+			wantResult: true,
+			wantErr:    false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			b := &Bot{
+				apiClient: tt.fields.apiClient,
+			}
+			gotResult, err := b.DeleteChatStickerSet(nil)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Bot.DeleteChatStickerSet() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if gotResult != tt.wantResult {
+				t.Errorf("Bot.DeleteChatStickerSet() = %v, want %v", gotResult, tt.wantResult)
+			}
+		})
+	}
+}
+
+func TestBot_SetChatStickerSet(t *testing.T) {
+	type fields struct {
+		apiClient apiClient
+	}
+	tests := []struct {
+		name       string
+		fields     fields
+		wantResult bool
+		wantErr    bool
+	}{
+		{
+			name: "test1",
+			fields: fields{
+				apiClient: &mockAPIClient{
+					method: "setChatStickerSet",
+					interfaceMethod: func() interface{} {
+						return true
+					},
+					bytesMethod: func() []byte {
+						return []byte("true")
+					},
+				},
+			},
+			wantResult: true,
+			wantErr:    false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			b := &Bot{
+				apiClient: tt.fields.apiClient,
+			}
+			gotResult, err := b.SetChatStickerSet(nil)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Bot.SetChatStickerSet() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if gotResult != tt.wantResult {
+				t.Errorf("Bot.SetChatStickerSet() = %v, want %v", gotResult, tt.wantResult)
+			}
+		})
+	}
+}
+
+func TestBot_GetChatMember(t *testing.T) {
+	type fields struct {
+		apiClient apiClient
+	}
+	tests := []struct {
+		name       string
+		fields     fields
+		wantResult axon.O
+		wantErr    bool
+	}{
+		{
+			name: "test1",
+			fields: fields{
+				apiClient: &mockAPIClient{
+					method: "getChatMember",
+					interfaceMethod: func() interface{} {
+						return map[string]interface{}{
+							"chat_id": 123456,
+						}
+					},
+					bytesMethod: func() []byte {
+						return []byte("true")
+					},
+				},
+			},
+			wantResult: map[string]interface{}{
+				"chat_id": 123456,
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			b := &Bot{
+				apiClient: tt.fields.apiClient,
+			}
+			gotResult, err := b.GetChatMember(axon.O{})
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Bot.GetChatMember() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(gotResult, tt.wantResult) {
+				t.Errorf("Bot.GetChatMember() = %v, want %v", gotResult, tt.wantResult)
+			}
+		})
+	}
+}
+
+func TestBot_GetChatMembersCount(t *testing.T) {
+	type fields struct {
+		apiClient apiClient
+	}
+	tests := []struct {
+		name       string
+		fields     fields
+		wantResult int64
+		wantErr    bool
+	}{
+		{
+			name: "test1",
+			fields: fields{
+				apiClient: &mockAPIClient{
+					method: "getChatMembersCount",
+					interfaceMethod: func() interface{} {
+						return 10.
+					},
+					bytesMethod: func() []byte {
+						return []byte("10")
+					},
+				},
+			},
+			wantResult: 10,
+			wantErr:    false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			b := &Bot{
+				apiClient: tt.fields.apiClient,
+			}
+			gotResult, err := b.GetChatMembersCount(axon.O{"chat_id": 123456})
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Bot.GetChatMembersCount() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(gotResult, tt.wantResult) {
+				t.Errorf("Bot.GetChatMembersCount() = %v, want %v", gotResult, tt.wantResult)
+			}
+		})
+	}
+}
+
+func TestBot_GetChatAdministrators(t *testing.T) {
+	type fields struct {
+		apiClient apiClient
+	}
+	tests := []struct {
+		name       string
+		fields     fields
+		wantResult axon.A
+		wantErr    bool
+	}{
+		{
+			name: "test1",
+			fields: fields{
+				apiClient: &mockAPIClient{
+					method: "getChatAdministrators",
+					interfaceMethod: func() interface{} {
+						return []interface{}{
+							map[string]interface{}{},
+						}
+					},
+					bytesMethod: func() []byte {
+						return []byte("[{}]")
+					},
+				},
+			},
+			wantResult: []interface{}{
+				map[string]interface{}{},
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			b := &Bot{
+				apiClient: tt.fields.apiClient,
+			}
+			gotResult, err := b.GetChatAdministrators(axon.O{})
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Bot.GetChatAdministrators() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(gotResult, tt.wantResult) {
+				t.Errorf("Bot.GetChatAdministrators() = %v, want %v", gotResult, tt.wantResult)
+			}
+		})
+	}
+}
