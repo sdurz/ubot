@@ -30,7 +30,7 @@ func ServerSource(bot *Bot, ctx context.Context, updatesChan chan axon.O) {
 			return
 		}
 		log.Println(string(body))
-		if err = json.Unmarshal(body, rawUpdate); err != nil {
+		if err = json.Unmarshal(body, &rawUpdate); err != nil {
 			log.Printf("Error decoding body: %v", err)
 			http.Error(w, "can't decode body", http.StatusBadRequest)
 			return
@@ -55,7 +55,7 @@ func ServerSource(bot *Bot, ctx context.Context, updatesChan chan axon.O) {
 		Handler: mux,
 	}
 	if ok, err := bot.SetWebhook(axon.O{"url": bot.Configuration.WebhookUrl}); !ok || err != nil {
-		log.Fatal("Can't set webhook")
+		log.Fatal("can't set webhook")
 		return
 	}
 	go http.ListenAndServe(bot.Configuration.ServerPort, mux)
@@ -65,7 +65,7 @@ func ServerSource(bot *Bot, ctx context.Context, updatesChan chan axon.O) {
 	defer cancel()
 
 	if err := srv.Shutdown(ctxShutDown); err != nil {
-		log.Fatalf("server Shutdown Failed:%+s", err)
+		log.Fatalf("server shutdown cailed: %+s", err)
 	}
 
 	log.Println("Server stopped")

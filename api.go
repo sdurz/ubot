@@ -203,10 +203,10 @@ func prepareSimpleValuePart(name string, value interface{}, writer *multipart.Wr
 }
 
 func prepareComplexValuePart(name string, value interface{}, writer *multipart.Writer) (fw io.Writer, fr io.Reader, err error) {
-	switch value.(type) {
+	switch unwrapped := value.(type) {
 	case axon.O, axon.A:
 		var dataBytes []byte
-		if dataBytes, err = json.Marshal(value); err != nil {
+		if dataBytes, err = json.Marshal(unwrapped); err != nil {
 			return
 		}
 		if fw, err = writer.CreatePart(textproto.MIMEHeader{
@@ -216,6 +216,14 @@ func prepareComplexValuePart(name string, value interface{}, writer *multipart.W
 			return
 		}
 		fr = bytes.NewBuffer(dataBytes)
+	case UploadFile:
+		if fw, err = writer.CreatePart(textproto.MIMEHeader{
+			"Content-Type":        {"application/octet-stream"},
+			"Content-Disposition": {fmt.Sprintf("form-data; name=\"%v\"; filename=\"%v\"", name, unwrapped.FileName)},
+		}); err != nil {
+			return
+		}
+		fr = bytes.NewBuffer(unwrapped.Data)
 	default:
 		log.Fatalf("Unsupported type %v", value)
 	}
