@@ -813,3 +813,91 @@ func TestBot_GetChatAdministrators(t *testing.T) {
 		})
 	}
 }
+
+func TestBot_GetChat(t *testing.T) {
+	type fields struct {
+		apiClient apiClient
+	}
+	tests := []struct {
+		name       string
+		fields     fields
+		wantResult axon.O
+		wantErr    bool
+	}{
+		{
+			name: "test1",
+			fields: fields{
+				apiClient: &mockAPIClient{
+					method: "getChat",
+					interfaceMethod: func() interface{} {
+						return make(map[string]interface{})
+					},
+					bytesMethod: func() []byte {
+						return []byte("{}")
+					},
+				},
+			},
+			wantResult: map[string]interface{}{},
+			wantErr:    false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			b := &Bot{
+				apiClient: tt.fields.apiClient,
+			}
+			gotResult, err := b.GetChat(axon.O{})
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Bot.GetChat() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(gotResult, tt.wantResult) {
+				t.Errorf("Bot.GetChat() = %v, want %v", gotResult, tt.wantResult)
+			}
+		})
+	}
+}
+
+func TestBot_LeaveChat(t *testing.T) {
+	type fields struct {
+		apiClient apiClient
+	}
+	tests := []struct {
+		name       string
+		fields     fields
+		wantResult bool
+		wantErr    bool
+	}{
+		{
+			name: "test1",
+			fields: fields{
+				apiClient: &mockAPIClient{
+					method: "leaveChat",
+					interfaceMethod: func() interface{} {
+						return true
+					},
+					bytesMethod: func() []byte {
+						return []byte("true")
+					},
+				},
+			},
+			wantResult: true,
+			wantErr:    false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			b := &Bot{
+				apiClient: tt.fields.apiClient,
+			}
+			gotResult, err := b.LeaveChat(axon.O{})
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Bot.LeaveChat() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(gotResult, tt.wantResult) {
+				t.Errorf("Bot.LeaveChat() = %v, want %v", gotResult, tt.wantResult)
+			}
+		})
+	}
+}

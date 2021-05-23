@@ -309,9 +309,9 @@ func (b *Bot) SetWebhook(request axon.O) (result bool, err error) {
 
 // DeleteWebhook implements deleteWebhook from Telegram Bot API
 // see https://core.telegram.org/bots/api#deletewebhook
-func (b *Bot) DeleteWebhook(request axon.O) (result bool, err error) {
+func (b *Bot) DeleteWebhook(dropPendingUpdates bool) (result bool, err error) {
 	var response interface{}
-	if response, err = b.doPost("deleteWebhook", request); err == nil {
+	if response, err = b.doPost("deleteWebhook", axon.O{"drop_pending_updates": dropPendingUpdates}); err == nil {
 		result = response.(bool)
 	}
 	return
@@ -359,10 +359,10 @@ func (b *Bot) UnpinAllChatMessages(request axon.O) (result bool, err error) {
 
 // LeaveChat leave a group, supergroup or channel.
 // see https://core.telegram.org/bots/api#leavechat
-func (b *Bot) LeaveChat(request axon.O) (result axon.O, err error) {
+func (b *Bot) LeaveChat(request axon.O) (result bool, err error) {
 	var response interface{}
 	if response, err = b.doPost("leaveChat", request); err == nil {
-		result = response.(map[string]interface{})
+		result = response.(bool)
 	}
 	return
 }
