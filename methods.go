@@ -259,40 +259,40 @@ func (b *Bot) GetFile(fileId string) (result axon.O, err error) {
 
 // KickChatMember kicks a user from a group, a supergroup or a channel.
 // see https://core.telegram.org/bots/api#kickchatmember
-func (b *Bot) KickChatMember(request axon.O) (result axon.O, err error) {
+func (b *Bot) KickChatMember(request axon.O) (result bool, err error) {
 	var response interface{}
 	if response, err = b.doPost("kickChatMember", request); err == nil {
-		result = response.(map[string]interface{})
+		result = response.(bool)
 	}
 	return
 }
 
 // UnbanChatMember unban a previously kicked user in a supergroup or channel.
 // see https://core.telegram.org/bots/api#unbanchatmember
-func (b *Bot) UnbanChatMember(request axon.O) (result axon.O, err error) {
+func (b *Bot) UnbanChatMember(request axon.O) (result bool, err error) {
 	var response interface{}
 	if response, err = b.doPost("unbanChatMember", request); err == nil {
-		result = response.(map[string]interface{})
+		result = response.(bool)
 	}
 	return
 }
 
 // RestrictChatMember unban a previously kicked user in a supergroup or channel.
 // see https://core.telegram.org/bots/api#restrictchatmember
-func (b *Bot) RestrictChatMember(request axon.O) (result axon.O, err error) {
+func (b *Bot) RestrictChatMember(request axon.O) (result bool, err error) {
 	var response interface{}
 	if response, err = b.doPost("restrictChatMember", request); err == nil {
-		result = response.(map[string]interface{})
+		result = response.(bool)
 	}
 	return
 }
 
 // PromoteChatMember unban a previously kicked user in a supergroup or channel.
 // see https://core.telegram.org/bots/api#promotechatmember
-func (b *Bot) PromoteChatMember(request axon.O) (result axon.O, err error) {
+func (b *Bot) PromoteChatMember(request axon.O) (result bool, err error) {
 	var response interface{}
 	if response, err = b.doPost("promoteChatMember", request); err == nil {
-		result = response.(map[string]interface{})
+		result = response.(bool)
 	}
 	return
 }
@@ -309,9 +309,9 @@ func (b *Bot) SetWebhook(request axon.O) (result bool, err error) {
 
 // DeleteWebhook implements deleteWebhook from Telegram Bot API
 // see https://core.telegram.org/bots/api#deletewebhook
-func (b *Bot) DeleteWebhook(dropPendingUpdates bool) (result bool, err error) {
+func (b *Bot) DeleteWebhook(request axon.O) (result bool, err error) {
 	var response interface{}
-	if response, err = b.doPost("deleteWebhook", axon.O{"drop_pending_updates": dropPendingUpdates}); err == nil {
+	if response, err = b.doPost("deleteWebhook", request); err == nil {
 		result = response.(bool)
 	}
 	return
@@ -413,8 +413,7 @@ func (b *Bot) GetChatMember(request axon.O) (result axon.O, err error) {
 func (b *Bot) SetChatStickerSet(request axon.O) (result bool, err error) {
 	var response interface{}
 	if response, err = b.doPost("setChatStickerSet", request); err == nil {
-		v := axon.V{Value: response}
-		result, err = v.AsBool()
+		result = response.(bool)
 	}
 	return
 }
