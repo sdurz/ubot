@@ -30,6 +30,7 @@ type User struct {
 	SupportsInlineQueries   bool   `json:"supports_inline_queries,omitempty"`
 }
 
+// UploadFile struct embeds binary data for sending binaries with send* methods.
 type UploadFile struct {
 	FileName string
 	Data     []byte

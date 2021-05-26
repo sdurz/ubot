@@ -1,10 +1,10 @@
 # uBot
-*uBot* is a minimalistic [Telegram BOT API](https://core.telegram.org/bots/api/) library for Golang that aims to be complete, idiomatic and extensible.
+**uBot** is a minimalistic [Telegram BOT API](https://core.telegram.org/bots/api/) library for Golang that aims to be complete, idiomatic and extensible.
+
+I'm writing this to support my own bot implementations. 
 
 ## Overview
-*uBot* is a bot framework for [Telegram BOT API](https://core.telegram.org/bots/api/) that I'm writing to support my own bot implementations. 
-
-Instead of providing a full API mapping, *uBot* relies on [axon](https://github.com/sdurz/axon) for accessing JSON data, which in turn is a minimal wrapper around Golang JSON marshal/unmarshal functionalities.
+Instead of providing a full API mapping, **uBot** relies on [axon](https://github.com/sdurz/axon) for accessing `JSON` data, which in turn is a minimal wrapper around Golang `JSON` marshal/unmarshal functionalities.
 
 It features a simple but extensible mechanism for message routing and filtering that allows the developers to write, reuse and compose their own [`Matcher`s](https://pkg.go.dev/github.com/sdurz/ubot#Matcher) and [`Handler`s](https://pkg.go.dev/github.com/sdurz/ubot#Handler).
 
@@ -12,7 +12,7 @@ The methods of [Telegram BOT API](https://core.telegram.org/bots/api/) are mappp
 
 The messages that are sent to the server are to be composed as specified on [Telegram's BOT API reference](https://core.telegram.org/bots/api). There's no need to memorize an additional layer nor coding conventions (in turn there's no guarantee that the sent messages are well formed, beware of HTTP 400 errors). 
 
-Messages are plain *axon* objects:
+Messages are plain **axon** objects:
 
 ```golang
 sentMsg, err := bot.SendMessage(axon.O{
@@ -29,7 +29,7 @@ chatId, err :== sentMsg.GetInteger("chat_id")
 ```
 
 
-Strengths or *uBot* are:
+Strengths or **uBot** are:
 - Minimal footprint
 - Easily extensible
 - It doesn't create any additional abstraction layer over Telegram bot API.
@@ -84,11 +84,11 @@ An Handler is a func that actually handles the incoming payload:
 type Handler func(context.Context, *Bot, O) (bool, error)
 ```
 
-`Matcher`(s) can be reused and composed, *uBot* provides quite a few boolean operators that help to compose simpler matchers.
+`Matcher`(s) can be reused and composed, **uBot** provides quite a few boolean operators that help to compose simpler matchers.
 
 ## Typed and untyped data
 
-*uBot* try to avoid strict type as much as possible, there are two exceptions to this:
+**uBot** try to avoid strict type as much as possible, there are two exceptions to this:
 
 * `ubot.User`
 * `ubot.UploadFile`
@@ -103,7 +103,7 @@ User information is retrieved upon bot startup and stored on the bot instance. F
 
 Every method used to send media or files accepts an `ubot.InputFile` as the media parameter.
 
-The API itself is very elastic in the way in accepts media data, see [Sending files](https://core.telegram.org/bots/api#sending-files) for more information. `ubot.UploadFile` comes in handy when you need to post the file using multipart/form-data (ie. when you need to include binary data within your payload):
+The API itself is very elastic in the way in accepts media data, see [Sending files](https://core.telegram.org/bots/api#sending-files) for more information. `ubot.UploadFile` comes in handy when you need to post with a `multipart/form-data` request (ie. when you need to include binary data within your payload):
 
 ```golang
 	if data, err := ioutil.ReadFile("image.jpg"); err == nil {
@@ -117,7 +117,7 @@ The API itself is very elastic in the way in accepts media data, see [Sending fi
 	}
 ```
 
-When an `ubot.UploadFile` value is detected the library will switch posting method to multipart/form-data automatically, otherwise it will format the request as JSON data.
+When an `ubot.UploadFile` value is detected the library will switch posting method to `multipart/form-data`, otherwise it will compose the request as `application/json`.
 
 ## Missing features
 
@@ -127,7 +127,7 @@ As of `0.1.0` at least these main features are missing:
 * fair unit testing coverage
 
 ## Caveats
--
+
 
 ## License
-*uBot* is distributed under MIT license.
+**uBot** is distributed under MIT license.
