@@ -119,9 +119,12 @@ The API itself is very elastic in the way in accepts media data, see [Sending fi
 
 When an ubot.UploadFile value is detected the library will switch posting method to multipart/form-data automatically, otherwise it will format the request as JSON data.
 
+## TODO
+
+Proper logging.
 
 ## Caveats
-Methods mapping is still not complete.
+
 
 ## License
 uBot is distributed under MIT.
