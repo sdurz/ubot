@@ -73,7 +73,7 @@ func main() (result *ubot.Bot, err error) {
 
 ## Matcher and Handler
 
-An Matcher is a func that is executed to check wheter an update is to be handled:
+An `Matcher` is a func that is executed to check wheter an update is to be handled:
 
 ```golang
 type Matcher func(*Bot, O) bool
@@ -84,24 +84,24 @@ An Handler is a func that actually handles the incoming payload:
 type Handler func(context.Context, *Bot, O) (bool, error)
 ```
 
-Matcher(s) can be reused and composed, _uBot_ provides quite a few boolean operators that help to compose simpler matchers.
+`Matcher`(s) can be reused and composed, *uBot* provides quite a few boolean operators that help to compose simpler matchers.
 
 ## Typed and untyped data
 
-Ubot try to avoid strict type as much as possible, there are two exceptions to this:
+*uBot* try to avoid strict type as much as possible, there are two exceptions to this:
 
-* ubot.User
-* ubot.UploadFile
+* `ubot.User`
+* `ubot.UploadFile`
   
 ### ubot.User
 
-ubot.User defines a Telegram Bot API [User](https://core.telegram.org/bots/api#user).
+`ubot.User` defines a Telegram Bot API [User](https://core.telegram.org/bots/api#user).
 
 User information is retrieved upon bot startup and stored on the bot instance. For consistency every method that returns a [User](https://core.telegram.org/bots/api#user) object will return a ubot.User too.
    
 ### ubot.UploadFile
 
-Every method used to send media or files accepts an ubot.InputFile as the media parameter.
+Every method used to send media or files accepts an `ubot.InputFile` as the media parameter.
 
 The API itself is very elastic in the way in accepts media data, see [Sending files](https://core.telegram.org/bots/api#sending-files) for more information. ubot.UploadFile comes in handy when you need to post the file using multipart/form-data (ie. when you need to include binary data within your payload):
 
@@ -109,7 +109,7 @@ The API itself is very elastic in the way in accepts media data, see [Sending fi
 	if data, err := ioutil.ReadFile("image.jpg"); err == nil {
 		bot.SendPhoto({
 			"chat_id": 123456789,
-			"photo": ubot.UploadFIle{
+			"photo": &ubot.UploadFIle{
 				FileName: "image.jpg",
 				Data fileData
 			},	
@@ -117,7 +117,7 @@ The API itself is very elastic in the way in accepts media data, see [Sending fi
 	}
 ```
 
-When an ubot.UploadFile value is detected the library will switch posting method to multipart/form-data automatically, otherwise it will format the request as JSON data.
+When an `ubot.UploadFile` value is detected the library will switch posting method to multipart/form-data automatically, otherwise it will format the request as JSON data.
 
 ## TODO
 
