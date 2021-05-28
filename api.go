@@ -219,11 +219,11 @@ func prepareComplexValuePart(name string, value interface{}, writer *multipart.W
 	case UploadFile:
 		if fw, err = writer.CreatePart(textproto.MIMEHeader{
 			"Content-Type":        {"application/octet-stream"},
-			"Content-Disposition": {fmt.Sprintf("form-data; name=\"%v\"; filename=\"%v\"", name, unwrapped.FileName)},
+			"Content-Disposition": {fmt.Sprintf("form-data; name=\"%v\"; filename=\"%v\"", name, unwrapped.GetName())},
 		}); err != nil {
 			return
 		}
-		fr = bytes.NewBuffer(unwrapped.Data)
+		fr = unwrapped.GetReader()
 	default:
 		log.Fatalf("Unsupported type %v", value)
 	}

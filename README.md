@@ -4,15 +4,19 @@
 I'm writing this to support my own bot implementations. 
 
 ## Overview
-Instead of providing a full API mapping, **uBot** relies on [axon](https://github.com/sdurz/axon) for accessing `JSON` data, which in turn is a minimal wrapper around Golang `JSON` marshal/unmarshal functionalities.
+Instead of providing a full API mapping, **uBot** relies on [**axon**](https://github.com/sdurz/axon) for accessing `JSON` data, which in turn is a minimal wrapper around Golang `JSON` marshal/unmarshal functionalities.
 
 It features a simple but extensible mechanism for message routing and filtering that allows the developers to write, reuse and compose their own [`Matcher`s](https://pkg.go.dev/github.com/sdurz/ubot#Matcher) and [`Handler`s](https://pkg.go.dev/github.com/sdurz/ubot#Handler).
 
+## API Methods
 The methods of [Telegram BOT API](https://core.telegram.org/bots/api/) are mappped one on one onto the [Bot](https://pkg.go.dev/github.com/sdurz/ubot#Bot) object. 
 
-The messages that are sent to the server are to be composed as specified on [Telegram's BOT API reference](https://core.telegram.org/bots/api). There's no need to memorize an additional layer nor coding conventions (in turn there's no guarantee that the sent messages are well formed, beware of HTTP 400 errors). 
+## API Types
+The messages that are sent to the server are [**axon**] objects to be composed as specified on [Telegram's BOT API reference](https://core.telegram.org/bots/api).
+There's no need to memorize an additional abstraction layer nor coding conventions (in turn there's no guarantee that the sent messages are well formed, beware of HTTP 400 errors). 
 
-Messages are plain **axon** objects:
+
+Messages are plain [`axon.O`](https://pkg.go.dev/github.com/sdurz/axon#O) objects:
 
 ```golang
 sentMsg, err := bot.SendMessage(axon.O{
@@ -21,7 +25,7 @@ sentMsg, err := bot.SendMessage(axon.O{
 })
 ```
 
-same applies to responses. You can access JSON properties with the dotted notation:
+Same applies to responses. You can access `JSON` properties with the dotted notation:
 
 ```golang
 chatId, err :== sentMsg.GetInteger("chat_id")
@@ -109,10 +113,7 @@ The API itself is very elastic in the way in accepts media data, see [Sending fi
 	if data, err := ioutil.ReadFile("image.jpg"); err == nil {
 		bot.SendPhoto({
 			"chat_id": 123456789,
-			"photo": &ubot.UploadFIle{
-				FileName: "image.jpg",
-				Data fileData
-			},	
+			"photo": ubot.NewBytesUploadFile("image.jpg", fileData),
 		})
 	}
 ```

@@ -1,7 +1,10 @@
 package ubot
 
 import (
+	"bytes"
 	"context"
+	"errors"
+	"io"
 
 	"github.com/sdurz/axon"
 )
@@ -31,7 +34,67 @@ type User struct {
 }
 
 // UploadFile struct embeds binary data for sending binaries with send* methods.
-type UploadFile struct {
-	FileName string
-	Data     []byte
+type UploadFile interface {
+	GetName() string
+	GetReader() io.Reader
+}
+
+type readerUploadFile struct {
+	fileName *string
+	reader   io.Reader
+}
+
+func (b *readerUploadFile) GetName() string {
+	return *(b.fileName)
+}
+
+func (b *readerUploadFile) GetReader() (result io.Reader) {
+	return b.reader
+}
+
+// NewReaderUploadFile creates an UploadFile instance from a reader and a name
+func NewReaderUploadFile(fileName string, reader io.Reader) (result UploadFile, err error) {
+	if fileName == "" {
+		err = errors.New("zero fileName")
+		return
+	}
+	if reader == nil {
+		err = errors.New("nil reader")
+		return
+	}
+	result = &readerUploadFile{
+		fileName: &fileName,
+		reader:   reader,
+	}
+	return
+}
+
+type bytesUploadFile struct {
+	fileName  *string
+	fileBytes []byte
+}
+
+func (b *bytesUploadFile) GetName() string {
+	return *(b.fileName)
+}
+
+func (b *bytesUploadFile) GetReader() (result io.Reader) {
+	return bytes.NewReader(b.fileBytes)
+}
+
+// NewBytesUploadFile creates an UploadFile instance from an array of bytes and a name
+func NewBytesUploadFile(fileName string, fileBytes []byte) (result UploadFile, err error) {
+	if fileName == "" {
+		err = errors.New("zero fileName")
+		return
+	}
+	if len(fileBytes) == 0 {
+		err = errors.New("zero length or nil fileBytes")
+		return
+	}
+	result = &bytesUploadFile{
+		fileName:  &fileName,
+		fileBytes: fileBytes,
+	}
+	return
 }
