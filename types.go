@@ -40,12 +40,12 @@ type UploadFile interface {
 }
 
 type readerUploadFile struct {
-	fileName *string
+	fileName string
 	reader   io.Reader
 }
 
 func (b *readerUploadFile) GetName() string {
-	return *(b.fileName)
+	return b.fileName
 }
 
 func (b *readerUploadFile) GetReader() (result io.Reader) {
@@ -63,19 +63,19 @@ func NewReaderUploadFile(fileName string, reader io.Reader) (result UploadFile, 
 		return
 	}
 	result = &readerUploadFile{
-		fileName: &fileName,
+		fileName: fileName,
 		reader:   reader,
 	}
 	return
 }
 
 type bytesUploadFile struct {
-	fileName  *string
+	fileName  string
 	fileBytes []byte
 }
 
 func (b *bytesUploadFile) GetName() string {
-	return *(b.fileName)
+	return b.fileName
 }
 
 func (b *bytesUploadFile) GetReader() (result io.Reader) {
@@ -93,7 +93,7 @@ func NewBytesUploadFile(fileName string, fileBytes []byte) (result UploadFile, e
 		return
 	}
 	result = &bytesUploadFile{
-		fileName:  &fileName,
+		fileName:  fileName,
 		fileBytes: fileBytes,
 	}
 	return

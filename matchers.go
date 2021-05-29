@@ -75,6 +75,22 @@ func MessageHasPhoto(bot *Bot, message axon.O) (result bool) {
 	return
 }
 
+// MessageHasLocation matches if updates has a location
+func MessageHasLocation(bot *Bot, message axon.O) (result bool) {
+	if _, err := message.GetObject("location"); err == nil {
+		result = true
+	}
+	return
+}
+
+// MessageHasUpdate matches if updates has a location
+func MessageHasEdited(bot *Bot, message axon.O) (result bool) {
+	if _, err := message.GetObject("edited_message"); err == nil {
+		result = true
+	}
+	return
+}
+
 // MatchMessageEntities matches if update has message entities
 func MessageHasEntities(bot *Bot, message axon.O) (result bool) {
 	if _, err := message.GetArray("entities"); err == nil {
