@@ -51,14 +51,14 @@ func ServerSource(bot *Bot, ctx context.Context, updatesChan chan axon.O) {
 	mux := http.NewServeMux()
 	mux.Handle("/bot"+bot.Configuration.APIToken, serverHandler)
 	srv := &http.Server{
-		Addr:    bot.Configuration.ServerPort,
+		Addr:    bot.Configuration.ServerBind,
 		Handler: mux,
 	}
 	if ok, err := bot.SetWebhook(axon.O{"url": bot.Configuration.WebhookUrl}); !ok || err != nil {
 		log.Fatal("can't set webhook")
 		return
 	}
-	go http.ListenAndServe(bot.Configuration.ServerPort, mux)
+	go http.ListenAndServe(bot.Configuration.ServerBind, mux)
 	<-ctx.Done()
 
 	ctxShutDown, cancel := context.WithTimeout(context.Background(), 5*time.Second)
