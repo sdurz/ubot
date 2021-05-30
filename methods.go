@@ -52,7 +52,8 @@ func (b *Bot) Close() (err error) {
 func (b *Bot) SendMessage(request axon.O) (result axon.O, err error) {
 	var response interface{}
 	if response, err = b.doPost("sendMessage", request); err == nil {
-		result = response.(map[string]interface{})
+		v := axon.V{Value: response}
+		result, err = v.AsObject()
 	}
 	return
 }
@@ -62,7 +63,8 @@ func (b *Bot) SendMessage(request axon.O) (result axon.O, err error) {
 func (b *Bot) ForwardMessage(request axon.O) (result axon.O, err error) {
 	var response interface{}
 	if response, err = b.doPost("forwardMessage", request); err == nil {
-		result = response.(map[string]interface{})
+		v := axon.V{Value: response}
+		result, err = v.AsObject()
 	}
 	return
 }
@@ -72,7 +74,8 @@ func (b *Bot) ForwardMessage(request axon.O) (result axon.O, err error) {
 func (b *Bot) CopyMessage(request axon.O) (result axon.O, err error) {
 	var response interface{}
 	if response, err = b.doPost("copyMessage", request); err == nil {
-		result = response.(map[string]interface{})
+		v := axon.V{Value: response}
+		result, err = v.AsObject()
 	}
 	return
 }
@@ -82,7 +85,8 @@ func (b *Bot) CopyMessage(request axon.O) (result axon.O, err error) {
 func (b *Bot) SendPhoto(request axon.O) (result axon.O, err error) {
 	var response interface{}
 	if response, err = b.doPostMultipart("sendPhoto", request); err == nil {
-		result = response.(map[string]interface{})
+		v := axon.V{Value: response}
+		result, err = v.AsObject()
 	}
 	return
 }
@@ -92,7 +96,8 @@ func (b *Bot) SendPhoto(request axon.O) (result axon.O, err error) {
 func (b *Bot) SendAudio(request axon.O) (result axon.O, err error) {
 	var response interface{}
 	if response, err = b.doPostMultipart("sendAudio", request); err == nil {
-		result = response.(map[string]interface{})
+		v := axon.V{Value: response}
+		result, err = v.AsObject()
 	}
 	return
 }
@@ -102,7 +107,8 @@ func (b *Bot) SendAudio(request axon.O) (result axon.O, err error) {
 func (b *Bot) SendDocument(request axon.O) (result axon.O, err error) {
 	var response interface{}
 	if response, err = b.doPostMultipart("sendDocument", request); err == nil {
-		result = response.(map[string]interface{})
+		v := axon.V{Value: response}
+		result, err = v.AsObject()
 	}
 	return
 }
@@ -112,7 +118,8 @@ func (b *Bot) SendDocument(request axon.O) (result axon.O, err error) {
 func (b *Bot) SendVideo(request axon.O) (result axon.O, err error) {
 	var response interface{}
 	if response, err = b.doPostMultipart("sendVideo", request); err == nil {
-		result = response.(map[string]interface{})
+		v := axon.V{Value: response}
+		result, err = v.AsObject()
 	}
 	return
 }
@@ -122,7 +129,8 @@ func (b *Bot) SendVideo(request axon.O) (result axon.O, err error) {
 func (b *Bot) SendAnimation(request axon.O) (result axon.O, err error) {
 	var response interface{}
 	if response, err = b.doPostMultipart("sendAnimation", request); err == nil {
-		result = response.(map[string]interface{})
+		v := axon.V{Value: response}
+		result, err = v.AsObject()
 	}
 	return
 }
@@ -132,7 +140,8 @@ func (b *Bot) SendAnimation(request axon.O) (result axon.O, err error) {
 func (b *Bot) SendVoice(request axon.O) (result axon.O, err error) {
 	var response interface{}
 	if response, err = b.doPostMultipart("sendVoice", request); err == nil {
-		result = response.(map[string]interface{})
+		v := axon.V{Value: response}
+		result, err = v.AsObject()
 	}
 	return
 }
@@ -142,7 +151,8 @@ func (b *Bot) SendVoice(request axon.O) (result axon.O, err error) {
 func (b *Bot) SendVideoNote(request axon.O) (result axon.O, err error) {
 	var response interface{}
 	if response, err = b.doPostMultipart("sendVideoNote", request); err == nil {
-		result = response.(map[string]interface{})
+		v := axon.V{Value: response}
+		result, err = v.AsObject()
 	}
 	return
 }
@@ -152,7 +162,8 @@ func (b *Bot) SendVideoNote(request axon.O) (result axon.O, err error) {
 func (b *Bot) SendMediaGroup(request axon.O) (result axon.O, err error) {
 	var response interface{}
 	if response, err = b.doPostMultipart("sendMediaGroup", request); err == nil {
-		result = response.(map[string]interface{})
+		v := axon.V{Value: response}
+		result, err = v.AsObject()
 	}
 	return
 }
@@ -162,7 +173,8 @@ func (b *Bot) SendMediaGroup(request axon.O) (result axon.O, err error) {
 func (b *Bot) SendLocation(request axon.O) (result axon.O, err error) {
 	var response interface{}
 	if response, err = b.doPost("sendLocation", request); err == nil {
-		result = response.(map[string]interface{})
+		v := axon.V{Value: response}
+		result, err = v.AsObject()
 	}
 	return
 }
@@ -172,7 +184,8 @@ func (b *Bot) SendLocation(request axon.O) (result axon.O, err error) {
 func (b *Bot) EditMessageLiveLocation(request axon.O) (result axon.O, err error) {
 	var response interface{}
 	if response, err = b.doPost("editMessageLiveLocation", request); err == nil {
-		result = response.(map[string]interface{})
+		v := axon.V{Value: response}
+		result, err = v.AsObject()
 	}
 	return
 }
@@ -182,7 +195,8 @@ func (b *Bot) EditMessageLiveLocation(request axon.O) (result axon.O, err error)
 func (b *Bot) StopMessageLiveLocation(request axon.O) (result axon.O, err error) {
 	var response interface{}
 	if response, err = b.doPost("stopMessageLiveLocation", request); err == nil {
-		result = response.(map[string]interface{})
+		v := axon.V{Value: response}
+		result, err = v.AsObject()
 	}
 	return
 }
@@ -192,7 +206,8 @@ func (b *Bot) StopMessageLiveLocation(request axon.O) (result axon.O, err error)
 func (b *Bot) SendVenue(request axon.O) (result axon.O, err error) {
 	var response interface{}
 	if response, err = b.doPost("sendVenue", request); err == nil {
-		result = response.(map[string]interface{})
+		v := axon.V{Value: response}
+		result, err = v.AsObject()
 	}
 	return
 }
@@ -202,7 +217,8 @@ func (b *Bot) SendVenue(request axon.O) (result axon.O, err error) {
 func (b *Bot) SendContact(request axon.O) (result axon.O, err error) {
 	var response interface{}
 	if response, err = b.doPost("sendContact", request); err == nil {
-		result = response.(map[string]interface{})
+		v := axon.V{Value: response}
+		result, err = v.AsObject()
 	}
 	return
 }
@@ -212,7 +228,8 @@ func (b *Bot) SendContact(request axon.O) (result axon.O, err error) {
 func (b *Bot) SendPoll(request axon.O) (result axon.O, err error) {
 	var response interface{}
 	if response, err = b.doPost("sendPoll", request); err == nil {
-		result = response.(map[string]interface{})
+		v := axon.V{Value: response}
+		result, err = v.AsObject()
 	}
 	return
 }
@@ -222,7 +239,8 @@ func (b *Bot) SendPoll(request axon.O) (result axon.O, err error) {
 func (b *Bot) SendDice(request axon.O) (result axon.O, err error) {
 	var response interface{}
 	if response, err = b.doPost("sendDice", request); err == nil {
-		result = response.(map[string]interface{})
+		v := axon.V{Value: response}
+		result, err = v.AsObject()
 	}
 	return
 }
@@ -232,7 +250,8 @@ func (b *Bot) SendDice(request axon.O) (result axon.O, err error) {
 func (b *Bot) SendChatAction(request axon.O) (result bool, err error) {
 	var response interface{}
 	if response, err = b.doPost("sendChatAction", request); err == nil {
-		result = response.(bool)
+		v := axon.V{Value: response}
+		result, err = v.AsBool()
 	}
 	return
 }
@@ -242,7 +261,8 @@ func (b *Bot) SendChatAction(request axon.O) (result bool, err error) {
 func (b *Bot) GetUserProfilePhotos(request axon.O) (result axon.O, err error) {
 	var response interface{}
 	if response, err = b.doPost("getUserProfilesPhotos", request); err == nil {
-		result = response.(map[string]interface{})
+		v := axon.V{Value: response}
+		result, err = v.AsObject()
 	}
 	return
 }
@@ -252,7 +272,8 @@ func (b *Bot) GetUserProfilePhotos(request axon.O) (result axon.O, err error) {
 func (b *Bot) GetFile(fileId string) (result axon.O, err error) {
 	var response interface{}
 	if response, err = b.doGet("getFile?file_id=" + fileId); err == nil {
-		result = response.(map[string]interface{})
+		v := axon.V{Value: response}
+		result, err = v.AsObject()
 	}
 	return
 }
@@ -262,7 +283,8 @@ func (b *Bot) GetFile(fileId string) (result axon.O, err error) {
 func (b *Bot) KickChatMember(request axon.O) (result bool, err error) {
 	var response interface{}
 	if response, err = b.doPost("kickChatMember", request); err == nil {
-		result = response.(bool)
+		v := axon.V{Value: response}
+		result, err = v.AsBool()
 	}
 	return
 }
@@ -272,7 +294,8 @@ func (b *Bot) KickChatMember(request axon.O) (result bool, err error) {
 func (b *Bot) UnbanChatMember(request axon.O) (result bool, err error) {
 	var response interface{}
 	if response, err = b.doPost("unbanChatMember", request); err == nil {
-		result = response.(bool)
+		v := axon.V{Value: response}
+		result, err = v.AsBool()
 	}
 	return
 }
@@ -282,7 +305,8 @@ func (b *Bot) UnbanChatMember(request axon.O) (result bool, err error) {
 func (b *Bot) RestrictChatMember(request axon.O) (result bool, err error) {
 	var response interface{}
 	if response, err = b.doPost("restrictChatMember", request); err == nil {
-		result = response.(bool)
+		v := axon.V{Value: response}
+		result, err = v.AsBool()
 	}
 	return
 }
@@ -292,7 +316,8 @@ func (b *Bot) RestrictChatMember(request axon.O) (result bool, err error) {
 func (b *Bot) PromoteChatMember(request axon.O) (result bool, err error) {
 	var response interface{}
 	if response, err = b.doPost("promoteChatMember", request); err == nil {
-		result = response.(bool)
+		v := axon.V{Value: response}
+		result, err = v.AsBool()
 	}
 	return
 }
@@ -302,7 +327,8 @@ func (b *Bot) PromoteChatMember(request axon.O) (result bool, err error) {
 func (b *Bot) SetWebhook(request axon.O) (result bool, err error) {
 	var response interface{}
 	if response, err = b.doPost("setWebhook", request); err == nil {
-		result = response.(bool)
+		v := axon.V{Value: response}
+		result, err = v.AsBool()
 	}
 	return
 }
@@ -312,7 +338,8 @@ func (b *Bot) SetWebhook(request axon.O) (result bool, err error) {
 func (b *Bot) DeleteWebhook(request axon.O) (result bool, err error) {
 	var response interface{}
 	if response, err = b.doPost("deleteWebhook", request); err == nil {
-		result = response.(bool)
+		v := axon.V{Value: response}
+		result, err = v.AsBool()
 	}
 	return
 }
@@ -322,7 +349,8 @@ func (b *Bot) DeleteWebhook(request axon.O) (result bool, err error) {
 func (b *Bot) GetWebhookInfo() (result axon.O, err error) {
 	var response interface{}
 	if response, err = b.doGet("getWebhookInfo"); err == nil {
-		result = response.(map[string]interface{})
+		v := axon.V{Value: response}
+		result, err = v.AsObject()
 	}
 	return
 }
@@ -332,7 +360,8 @@ func (b *Bot) GetWebhookInfo() (result axon.O, err error) {
 func (b *Bot) PinChatMessage(request axon.O) (result bool, err error) {
 	var response interface{}
 	if response, err = b.doPost("pinChatMessage", request); err == nil {
-		result = response.(bool)
+		v := axon.V{Value: response}
+		result, err = v.AsBool()
 	}
 	return
 }
@@ -342,7 +371,8 @@ func (b *Bot) PinChatMessage(request axon.O) (result bool, err error) {
 func (b *Bot) UnpinChatMessage(request axon.O) (result bool, err error) {
 	var response interface{}
 	if response, err = b.doPost("unpinChatMessage", request); err == nil {
-		result = response.(bool)
+		v := axon.V{Value: response}
+		result, err = v.AsBool()
 	}
 	return
 }
@@ -352,7 +382,8 @@ func (b *Bot) UnpinChatMessage(request axon.O) (result bool, err error) {
 func (b *Bot) UnpinAllChatMessages(request axon.O) (result bool, err error) {
 	var response interface{}
 	if response, err = b.doPost("unpinAllChatMessages", request); err == nil {
-		result = response.(bool)
+		v := axon.V{Value: response}
+		result, err = v.AsBool()
 	}
 	return
 }
@@ -362,7 +393,8 @@ func (b *Bot) UnpinAllChatMessages(request axon.O) (result bool, err error) {
 func (b *Bot) LeaveChat(request axon.O) (result bool, err error) {
 	var response interface{}
 	if response, err = b.doPost("leaveChat", request); err == nil {
-		result = response.(bool)
+		v := axon.V{Value: response}
+		result, err = v.AsBool()
 	}
 	return
 }
@@ -372,7 +404,8 @@ func (b *Bot) LeaveChat(request axon.O) (result bool, err error) {
 func (b *Bot) GetChat(request axon.O) (result axon.O, err error) {
 	var response interface{}
 	if response, err = b.doPost("getChat", request); err == nil {
-		result = response.(map[string]interface{})
+		v := axon.V{Value: response}
+		result, err = v.AsObject()
 	}
 	return
 }
@@ -382,7 +415,8 @@ func (b *Bot) GetChat(request axon.O) (result axon.O, err error) {
 func (b *Bot) GetChatAdministrators(request axon.O) (result axon.A, err error) {
 	var response interface{}
 	if response, err = b.doPost("getChatAdministrators", request); err == nil {
-		result = response.([]interface{})
+		v := axon.V{Value: response}
+		result, err = v.AsArray()
 	}
 	return
 }
@@ -403,7 +437,8 @@ func (b *Bot) GetChatMembersCount(request axon.O) (result int64, err error) {
 func (b *Bot) GetChatMember(request axon.O) (result axon.O, err error) {
 	var response interface{}
 	if response, err = b.doPost("getChatMember", request); err == nil {
-		result = response.(map[string]interface{})
+		v := axon.V{Value: response}
+		result, err = v.AsObject()
 	}
 	return
 }
@@ -413,7 +448,8 @@ func (b *Bot) GetChatMember(request axon.O) (result axon.O, err error) {
 func (b *Bot) SetChatStickerSet(request axon.O) (result bool, err error) {
 	var response interface{}
 	if response, err = b.doPost("setChatStickerSet", request); err == nil {
-		result = response.(bool)
+		v := axon.V{Value: response}
+		result, err = v.AsBool()
 	}
 	return
 }
