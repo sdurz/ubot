@@ -13,7 +13,7 @@ import (
 // Configuration struct holds configuration data for the bot
 type Configuration struct {
 	APIToken   string `json:"api_token"`
-	ServerPort string `json:"server_port"`
+	ServerBind string `json:"server_port"`
 	WebhookUrl string `json:"webhook_url"`
 	WorkerNo   int    `json:"worker_no"`
 }
