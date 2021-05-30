@@ -460,3 +460,76 @@ func (b *Bot) GetMyCommands() (result axon.A, err error) {
 	}
 	return
 }
+
+// EditMessageText edits a message text without resending
+// https://core.telegram.org/bots/api#editemessagetext
+func (b *Bot) EditMessageText(request axon.O) (result interface{}, err error) {
+	var response interface{}
+	if response, err = b.doPost("editMessageText", request); err == nil {
+		v := axon.V{Value: response}
+		if result, err = v.AsObject(); err != nil {
+			result, err = v.AsBool()
+		}
+	}
+	return
+}
+
+// EditMessageCaption edits a message caption without resending
+// https://core.telegram.org/bots/api#editmessagecaption
+func (b *Bot) EditMessageCaption(request axon.O) (result interface{}, err error) {
+	var response interface{}
+	if response, err = b.doPost("editMessageCaption", request); err == nil {
+		v := axon.V{Value: response}
+		if result, err = v.AsObject(); err != nil {
+			result, err = v.AsBool()
+		}
+	}
+	return
+}
+
+// EditMessageMedia edits a message media without resending
+// https://core.telegram.org/bots/api#editmessagemedia
+func (b *Bot) EditMessageMedia(request axon.O) (result interface{}, err error) {
+	var response interface{}
+	if response, err = b.doPost("editMessageMedia", request); err == nil {
+		v := axon.V{Value: response}
+		if result, err = v.AsObject(); err != nil {
+			result, err = v.AsBool()
+		}
+	}
+	return
+}
+
+// EditMessageReplyMarkup edits a message reply markup without resending
+// https://core.telegram.org/bots/api#editmessagemedia
+func (b *Bot) EditMessageReplyMarkup(request axon.O) (result interface{}, err error) {
+	var response interface{}
+	if response, err = b.doPost("editMessageReplyMarkup", request); err == nil {
+		v := axon.V{Value: response}
+		if result, err = v.AsObject(); err != nil {
+			result, err = v.AsBool()
+		}
+	}
+	return
+}
+
+// StopPoll stops a poll which was sent by the bot
+// see https://core.telegram.org/bots/api#stoppoll
+func (b *Bot) StopPoll(request axon.O) (result axon.O, err error) {
+	var response interface{}
+	if response, err = b.doPost("stopPoll", request); err == nil {
+		result = response.(map[string]interface{})
+	}
+	return
+}
+
+// DeleteMessage deletes a message
+// https://core.telegram.org/bots/api#deletemessage
+func (b *Bot) DeleteMessage(request axon.O) (result bool, err error) {
+	var response interface{}
+	if response, err = b.doPost("deleteMessage", request); err == nil {
+		v := axon.V{Value: response}
+		result, err = v.AsBool()
+	}
+	return
+}
