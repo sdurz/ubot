@@ -1344,3 +1344,455 @@ func TestBot_KickChatMember(t *testing.T) {
 		})
 	}
 }
+
+func TestBot_GetFile(t *testing.T) {
+	type fields struct {
+		apiClient apiClient
+	}
+	type args struct {
+		fileId string
+	}
+	tests := []struct {
+		name       string
+		fields     fields
+		args       args
+		wantResult axon.O
+		wantErr    bool
+	}{
+		{
+			name: "test1",
+			fields: fields{
+				apiClient: &mockAPIClient{
+					method: "getFile",
+					interfaceMethod: func() interface{} {
+						return make(map[string]interface{})
+					},
+					bytesMethod: func() []byte {
+						return []byte("{}")
+					},
+				},
+			},
+			args: args{
+				fileId: "filename",
+			},
+			wantResult: axon.O{},
+			wantErr:    false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			b := &Bot{
+				apiClient: tt.fields.apiClient,
+			}
+			gotResult, err := b.GetFile(tt.args.fileId)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Bot.GetFile() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(gotResult, tt.wantResult) {
+				t.Errorf("Bot.GetFile() = %v, want %v", gotResult, tt.wantResult)
+			}
+		})
+	}
+}
+
+func TestBot_GetUserProfilePhotos(t *testing.T) {
+	type fields struct {
+		apiClient apiClient
+	}
+	type args struct {
+		request axon.O
+	}
+	tests := []struct {
+		name       string
+		fields     fields
+		args       args
+		wantResult axon.O
+		wantErr    bool
+	}{
+		{
+			name: "test1",
+			fields: fields{
+				apiClient: &mockAPIClient{
+					method: "getUserProfilePhotos",
+					interfaceMethod: func() interface{} {
+						return make(map[string]interface{})
+					},
+					bytesMethod: func() []byte {
+						return []byte("{}")
+					},
+				},
+			},
+			args: args{
+				request: axon.O{},
+			},
+			wantResult: axon.O{},
+			wantErr:    false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			b := &Bot{
+				apiClient: tt.fields.apiClient,
+			}
+			gotResult, err := b.GetUserProfilePhotos(tt.args.request)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Bot.GetUserProfilePhotos() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(gotResult, tt.wantResult) {
+				t.Errorf("Bot.GetUserProfilePhotos() = %v, want %v", gotResult, tt.wantResult)
+			}
+		})
+	}
+}
+
+func TestBot_SendChatAction(t *testing.T) {
+	type fields struct {
+		apiClient apiClient
+	}
+	tests := []struct {
+		name       string
+		fields     fields
+		wantResult bool
+		wantErr    bool
+	}{
+		{
+			name: "test1",
+			fields: fields{
+				apiClient: &mockAPIClient{
+					method: "sendChatAction",
+					interfaceMethod: func() interface{} {
+						return true
+					},
+					bytesMethod: func() []byte {
+						return []byte("true")
+					},
+				},
+			},
+			wantResult: true,
+			wantErr:    false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			b := &Bot{
+				apiClient: tt.fields.apiClient,
+			}
+			gotResult, err := b.SendChatAction(axon.O{})
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Bot.SendChatAction() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(gotResult, tt.wantResult) {
+				t.Errorf("Bot.SendChatAction() = %v, want %v", gotResult, tt.wantResult)
+			}
+		})
+	}
+}
+
+func TestBot_SendDice(t *testing.T) {
+	type fields struct {
+		apiClient apiClient
+	}
+	type args struct {
+		request axon.O
+	}
+	tests := []struct {
+		name       string
+		fields     fields
+		args       args
+		wantResult axon.O
+		wantErr    bool
+	}{
+		{
+			name: "test1",
+			fields: fields{
+				apiClient: &mockAPIClient{
+					method: "sendDice",
+					interfaceMethod: func() interface{} {
+						return make(map[string]interface{})
+					},
+					bytesMethod: func() []byte {
+						return []byte("{}")
+					},
+				},
+			},
+			args: args{
+				request: axon.O{},
+			},
+			wantResult: axon.O{},
+			wantErr:    false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			b := &Bot{
+				apiClient: tt.fields.apiClient,
+			}
+			gotResult, err := b.SendDice(tt.args.request)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Bot.SendDice() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(gotResult, tt.wantResult) {
+				t.Errorf("Bot.SendDice() = %v, want %v", gotResult, tt.wantResult)
+			}
+		})
+	}
+}
+
+func TestBot_SendPoll(t *testing.T) {
+	type fields struct {
+		apiClient apiClient
+	}
+	type args struct {
+		request axon.O
+	}
+	tests := []struct {
+		name       string
+		fields     fields
+		args       args
+		wantResult axon.O
+		wantErr    bool
+	}{
+		{
+			name: "test1",
+			fields: fields{
+				apiClient: &mockAPIClient{
+					method: "sendPoll",
+					interfaceMethod: func() interface{} {
+						return make(map[string]interface{})
+					},
+					bytesMethod: func() []byte {
+						return []byte("{}")
+					},
+				},
+			},
+			args: args{
+				request: axon.O{},
+			},
+			wantResult: axon.O{},
+			wantErr:    false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			b := &Bot{
+				apiClient: tt.fields.apiClient,
+			}
+			gotResult, err := b.SendPoll(tt.args.request)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Bot.SendPoll() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(gotResult, tt.wantResult) {
+				t.Errorf("Bot.SendPoll() = %v, want %v", gotResult, tt.wantResult)
+			}
+		})
+	}
+}
+
+func TestBot_SendContact(t *testing.T) {
+	type fields struct {
+		apiClient apiClient
+	}
+	type args struct {
+		request axon.O
+	}
+	tests := []struct {
+		name       string
+		fields     fields
+		args       args
+		wantResult axon.O
+		wantErr    bool
+	}{
+		{
+			name: "test1",
+			fields: fields{
+				apiClient: &mockAPIClient{
+					method: "sendContact",
+					interfaceMethod: func() interface{} {
+						return make(map[string]interface{})
+					},
+					bytesMethod: func() []byte {
+						return []byte("{}")
+					},
+				},
+			},
+			args: args{
+				request: axon.O{},
+			},
+			wantResult: axon.O{},
+			wantErr:    false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			b := &Bot{
+				apiClient: tt.fields.apiClient,
+			}
+			gotResult, err := b.SendContact(tt.args.request)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Bot.SendContact() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(gotResult, tt.wantResult) {
+				t.Errorf("Bot.SendContact() = %v, want %v", gotResult, tt.wantResult)
+			}
+		})
+	}
+}
+
+func TestBot_SendVenue(t *testing.T) {
+	type fields struct {
+		apiClient apiClient
+	}
+	type args struct {
+		request axon.O
+	}
+	tests := []struct {
+		name       string
+		fields     fields
+		args       args
+		wantResult axon.O
+		wantErr    bool
+	}{
+		{
+			name: "test1",
+			fields: fields{
+				apiClient: &mockAPIClient{
+					method: "sendVenue",
+					interfaceMethod: func() interface{} {
+						return make(map[string]interface{})
+					},
+					bytesMethod: func() []byte {
+						return []byte("{}")
+					},
+				},
+			},
+			args: args{
+				request: axon.O{},
+			},
+			wantResult: axon.O{},
+			wantErr:    false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			b := &Bot{
+				apiClient: tt.fields.apiClient,
+			}
+			gotResult, err := b.SendVenue(tt.args.request)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Bot.SendVenue() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(gotResult, tt.wantResult) {
+				t.Errorf("Bot.SendVenue() = %v, want %v", gotResult, tt.wantResult)
+			}
+		})
+	}
+}
+
+func TestBot_StopMessageLiveLocation(t *testing.T) {
+	type fields struct {
+		apiClient apiClient
+	}
+	type args struct {
+		request axon.O
+	}
+	tests := []struct {
+		name       string
+		fields     fields
+		args       args
+		wantResult axon.O
+		wantErr    bool
+	}{
+		{
+			name: "test1",
+			fields: fields{
+				apiClient: &mockAPIClient{
+					method: "stopMessageLiveLocation",
+					interfaceMethod: func() interface{} {
+						return make(map[string]interface{})
+					},
+					bytesMethod: func() []byte {
+						return []byte("{}")
+					},
+				},
+			},
+			args: args{
+				request: axon.O{},
+			},
+			wantResult: axon.O{},
+			wantErr:    false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			b := &Bot{
+				apiClient: tt.fields.apiClient,
+			}
+			gotResult, err := b.StopMessageLiveLocation(tt.args.request)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Bot.StopMessageLiveLocation() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(gotResult, tt.wantResult) {
+				t.Errorf("Bot.StopMessageLiveLocation() = %v, want %v", gotResult, tt.wantResult)
+			}
+		})
+	}
+}
+
+func TestBot_EditMessageLiveLocation(t *testing.T) {
+	type fields struct {
+		apiClient apiClient
+	}
+	type args struct {
+		request axon.O
+	}
+	tests := []struct {
+		name       string
+		fields     fields
+		args       args
+		wantResult axon.O
+		wantErr    bool
+	}{
+		{
+			name: "test1",
+			fields: fields{
+				apiClient: &mockAPIClient{
+					method: "editMessageLiveLocation",
+					interfaceMethod: func() interface{} {
+						return make(map[string]interface{})
+					},
+					bytesMethod: func() []byte {
+						return []byte("{}")
+					},
+				},
+			},
+			args: args{
+				request: axon.O{},
+			},
+			wantResult: axon.O{},
+			wantErr:    false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			b := &Bot{
+				apiClient: tt.fields.apiClient,
+			}
+			gotResult, err := b.EditMessageLiveLocation(tt.args.request)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Bot.EditMessageLiveLocation() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(gotResult, tt.wantResult) {
+				t.Errorf("Bot.EditMessageLiveLocation() = %v, want %v", gotResult, tt.wantResult)
+			}
+		})
+	}
+}

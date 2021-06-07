@@ -260,7 +260,7 @@ func (b *Bot) SendChatAction(request axon.O) (result bool, err error) {
 // see https://core.telegram.org/bots/api#getuserprofilephotos
 func (b *Bot) GetUserProfilePhotos(request axon.O) (result axon.O, err error) {
 	var response interface{}
-	if response, err = b.doPost("getUserProfilesPhotos", request); err == nil {
+	if response, err = b.doPost("getUserProfilePhotos", request); err == nil {
 		v := axon.V{Value: response}
 		result, err = v.AsObject()
 	}

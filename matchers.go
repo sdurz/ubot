@@ -179,9 +179,9 @@ func MessageHasCommand(entity string) func(bot *Bot, message axon.O) (result boo
 				return
 			}
 			nttText := text[offset : offset+length]
-			if !isGroup && nttText == "/"+entity {
+			if !isGroup && nttText == entity {
 				result = true
-			} else if isGroup && b.BotUser.Username != "" && nttText == "/"+entity+"@"+b.BotUser.Username {
+			} else if isGroup && b.BotUser.Username != "" && nttText == entity+"@"+b.BotUser.Username {
 				result = true
 			}
 		}
