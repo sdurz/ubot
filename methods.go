@@ -126,11 +126,11 @@ func (b *Bot) SendVideo(request axon.O) (result axon.O, err error) {
 
 // SendAnimation sends an animation
 // see https://core.telegram.org/bots/api#sendanimation
-func (b *Bot) SendAnimation(request axon.O) (result axon.O, err error) {
+func (b *Bot) SendAnimation(request axon.O) (result axon.A, err error) {
 	var response interface{}
 	if response, err = b.doPostMultipart("sendAnimation", request); err == nil {
 		v := axon.V{Value: response}
-		result, err = v.AsObject()
+		result, err = v.AsArray()
 	}
 	return
 }
@@ -159,11 +159,11 @@ func (b *Bot) SendVideoNote(request axon.O) (result axon.O, err error) {
 
 // SendVoice sends a media group
 // see https://core.telegram.org/bots/api#sendmediagroup
-func (b *Bot) SendMediaGroup(request axon.O) (result axon.O, err error) {
+func (b *Bot) SendMediaGroup(request axon.O) (result axon.A, err error) {
 	var response interface{}
 	if response, err = b.doPostMultipart("sendMediaGroup", request); err == nil {
 		v := axon.V{Value: response}
-		result, err = v.AsObject()
+		result, err = v.AsArray()
 	}
 	return
 }
